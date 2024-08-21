@@ -25,6 +25,9 @@ export interface Post {
   createdAt: Date;
   authorId: string;
   author: Author;
+  qtyLikes: number;
+  qtyRetweets: number;
+  qtyComments: number;
   reactions: Reaction[];
   comments: Post[];
 }

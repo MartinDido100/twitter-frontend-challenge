@@ -1,46 +1,44 @@
-import React, {useEffect, useState} from "react";
-import {StyledTweetContainer} from "./TweetContainer";
-import AuthorData from "./user-post-data/AuthorData";
-import type {Post, User} from "../../service";
-import {StyledReactionsContainer} from "./ReactionsContainer";
-import Reaction from "./reaction/Reaction";
-import {useHttpRequestService} from "../../service/HttpRequestService";
-import {IconType} from "../icon/Icon";
-import {StyledContainer} from "../common/Container";
-import ThreeDots from "../common/ThreeDots";
-import DeletePostModal from "./delete-post-modal/DeletePostModal";
-import ImageContainer from "./tweet-image/ImageContainer";
-import CommentModal from "../comment/comment-modal/CommentModal";
-import {useNavigate} from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { StyledTweetContainer } from './TweetContainer';
+import AuthorData from './user-post-data/AuthorData';
+import type { Post, User } from '../../service';
+import { StyledReactionsContainer } from './ReactionsContainer';
+import Reaction from './reaction/Reaction';
+import { useHttpRequestService } from '../../service/HttpRequestService';
+import { IconType } from '../icon/Icon';
+import { StyledContainer } from '../common/Container';
+import ThreeDots from '../common/ThreeDots';
+import DeletePostModal from './delete-post-modal/DeletePostModal';
+import ImageContainer from './tweet-image/ImageContainer';
+import CommentModal from '../comment/comment-modal/CommentModal';
+import { useNavigate } from 'react-router-dom';
 
 interface TweetProps {
   post: Post;
 }
 
-const Tweet = ({post}: TweetProps) => {
+const Tweet = ({ post }: TweetProps) => {
   const [actualPost, setActualPost] = useState<Post>(post);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
   const service = useHttpRequestService();
   const navigate = useNavigate();
-  const [user, setUser] = useState<User>()
+  const [user, setUser] = useState<User>();
 
   useEffect(() => {
-    handleGetUser().then(r => setUser(r))
+    handleGetUser().then((r) => setUser(r));
   }, []);
 
   const handleGetUser = async () => {
-    return await service.me()
-  }
+    return await service.me();
+  };
 
   const getCountByType = (type: string): number => {
     return actualPost?.reactions?.filter((r) => r.type === type).length ?? 0;
   };
 
   const handleReaction = async (type: string) => {
-    const reacted = actualPost.reactions.find(
-        (r) => r.type === type && r.userId === user?.id
-    );
+    const reacted = actualPost.reactions.find((r) => r.type === type && r.userId === user?.id);
     if (reacted) {
       await service.deleteReaction(reacted.id);
     } else {
@@ -51,85 +49,83 @@ const Tweet = ({post}: TweetProps) => {
   };
 
   const hasReactedByType = (type: string): boolean => {
-    return actualPost.reactions.some(
-        (r) => r.type === type && r.userId === user?.id
-    );
+    // TODO: Adapt this to my backend endpoint
+    return false;
+    return actualPost.reactions.some((r) => r.type === type && r.userId === user?.id);
   };
-
+  console.log(post);
   return (
-      <StyledTweetContainer>
-        <StyledContainer
-            style={{width: "100%"}}
-            flexDirection={"row"}
-            alignItems={"center"}
-            justifyContent={"center"}
-            maxHeight={"48px"}
-        >
-          <AuthorData
+    <>
+      {post && (
+        <StyledTweetContainer>
+          <StyledContainer
+            style={{ width: '100%' }}
+            flexDirection={'row'}
+            alignItems={'center'}
+            justifyContent={'center'}
+            maxHeight={'48px'}
+          >
+            <AuthorData
               id={post.author.id}
-              name={post.author.name ?? "Name"}
+              name={post.author.name ?? 'Name'}
               username={post.author.username}
               createdAt={post.createdAt}
               profilePicture={post.author.profilePicture}
-          />
-          {post.authorId === user?.id && (
+            />
+            {post.authorId === user?.id && (
               <>
                 <DeletePostModal
-                    show={showDeleteModal}
-                    id={post.id}
-                    onClose={() => {
-                      setShowDeleteModal(false);
-                    }}
+                  show={showDeleteModal}
+                  id={post.id}
+                  onClose={() => {
+                    setShowDeleteModal(false);
+                  }}
                 />
                 <ThreeDots
-                    onClick={() => {
-                      setShowDeleteModal(!showDeleteModal);
-                    }}
+                  onClick={() => {
+                    setShowDeleteModal(!showDeleteModal);
+                  }}
                 />
               </>
-          )}
-        </StyledContainer>
-        <StyledContainer onClick={() => navigate(`/post/${post.id}`)}>
-          <p>{post.content}</p>
-        </StyledContainer>
-        {post.images && post.images!.length > 0 && (
-            <StyledContainer padding={"0 0 0 10%"}>
-              <ImageContainer images={post.images}/>
+            )}
+          </StyledContainer>
+          <StyledContainer onClick={() => navigate(`/post/${post.id}`)}>
+            <p>{post.content}</p>
+          </StyledContainer>
+          {post.images && post.images!.length > 0 && (
+            <StyledContainer padding={'0 0 0 10%'}>
+              <ImageContainer images={post.images} />
             </StyledContainer>
-        )}
-        <StyledReactionsContainer>
-          <Reaction
+          )}
+          <StyledReactionsContainer>
+            <Reaction
               img={IconType.CHAT}
-              count={actualPost?.comments?.length}
+              count={actualPost?.qtyComments}
               reactionFunction={() =>
-                  window.innerWidth > 600
-                      ? setShowCommentModal(true)
-                      : navigate(`/compose/comment/${post.id}`)
+                window.innerWidth > 600 ? setShowCommentModal(true) : navigate(`/compose/comment/${post.id}`)
               }
               increment={0}
               reacted={false}
-          />
-          <Reaction
+            />
+            <Reaction
               img={IconType.RETWEET}
-              count={getCountByType("RETWEET")}
-              reactionFunction={() => handleReaction("RETWEET")}
+              count={actualPost?.qtyRetweets}
+              reactionFunction={() => handleReaction('RETWEET')}
               increment={1}
-              reacted={hasReactedByType("RETWEET")}
-          />
-          <Reaction
+              reacted={hasReactedByType('RETWEET')}
+            />
+            <Reaction
               img={IconType.LIKE}
-              count={getCountByType("LIKE")}
-              reactionFunction={() => handleReaction("LIKE")}
+              count={actualPost?.qtyLikes}
+              reactionFunction={() => handleReaction('LIKE')}
               increment={1}
-              reacted={hasReactedByType("LIKE")}
-          />
-        </StyledReactionsContainer>
-        <CommentModal
-            show={showCommentModal}
-            post={post}
-            onClose={() => setShowCommentModal(false)}
-        />
-      </StyledTweetContainer>
+              reacted={hasReactedByType('LIKE')}
+            />
+          </StyledReactionsContainer>
+          <CommentModal show={showCommentModal} post={post} onClose={() => setShowCommentModal(false)} />
+        </StyledTweetContainer>
+      )}
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components'
 
 export const StyledInputElement = styled.input`
   font-size: 16px;
@@ -9,4 +9,4 @@ export const StyledInputElement = styled.input`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-`;
+`
