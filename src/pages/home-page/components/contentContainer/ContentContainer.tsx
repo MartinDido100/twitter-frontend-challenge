@@ -1,4 +1,3 @@
-import React from "react";
 import { StyledContentContainer } from "./StyledContentContainer";
 import Header from "../header/Header";
 import TweetBox from "../../../../components/tweet-box/TweetBox";

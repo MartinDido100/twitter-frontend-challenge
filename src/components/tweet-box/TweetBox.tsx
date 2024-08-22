@@ -1,7 +1,6 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import Button from '../button/Button';
 import TweetInput from '../tweet-input/TweetInput';
-import { useHttpRequestService } from '../../service/HttpRequestService';
 import { setLength, updateFeed } from '../../redux/user';
 import ImageContainer from '../tweet/tweet-image/ImageContainer';
 import { BackArrowIcon } from '../icon/Icon';
@@ -12,14 +11,14 @@ import { StyledTweetBoxContainer } from './TweetBoxContainer';
 import { StyledContainer } from '../common/Container';
 import { StyledButtonContainer } from './ButtonContainer';
 import { useDispatch, useSelector } from 'react-redux';
-import { User } from '../../service';
 import { RootState } from '../../redux/store';
+import { useHttpRequestService } from '../../service/HttpRequestService';
+import { useGetUser } from '../../redux/hooks';
 
 interface TweetBoxProps {
   parentId?: string;
   close?: () => void;
   mobile?: boolean;
-  borderless?: boolean
 }
 
 const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
@@ -31,22 +30,15 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
   const httpService = useHttpRequestService();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const service = useHttpRequestService();
-  const [user, setUser] = useState<User | undefined>();
-
-  useEffect(() => {
-    handleGetUser().then((r) => setUser(r));
-  }, []);
-
-  const handleGetUser = async () => {
-    return await service.me();
-  };
+  const user = useGetUser();
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
   };
   const handleSubmit = async () => {
     try {
+      //TODO: Upload post here
+      //TODO: Check how images are uploaded and fix it in httpService
       setContent('');
       setImages([]);
       setImagesPreview([]);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BackArrowIcon } from "../../components/icon/Icon";
 import Button from "../../components/button/Button";
-import {Post, User} from "../../service";
+import {Post} from "../../service";
 import AuthorData from "../../components/tweet/user-post-data/AuthorData";
 import ImageContainer from "../../components/tweet/tweet-image/ImageContainer";
 import { useLocation } from "react-router-dom";
@@ -11,7 +11,7 @@ import ImageInput from "../../components/common/ImageInput";
 import { setLength, updateFeed } from "../../redux/user";
 import { useTranslation } from "react-i18next";
 import { ButtonType } from "../../components/button/StyledButton";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useAppDispatch, useAppSelector, useGetUser } from "../../redux/hooks";
 import { StyledContainer } from "../../components/common/Container";
 import { StyledLine } from "../../components/common/Line";
 import { StyledP } from "../../components/common/text";
@@ -20,20 +20,12 @@ const CommentPage = () => {
   const [content, setContent] = useState("");
   const [post, setPost] = useState<Post | undefined>(undefined);
   const [images, setImages] = useState<File[]>([]);
-  const [user, setUser] = useState<User>()
+  const user = useGetUser()
   const postId = useLocation().pathname.split("/")[3];
   const service = useHttpRequestService();
   const { length, query } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-
-  useEffect(() => {
-    handleGetUser().then(r => setUser(r))
-  }, []);
-
-  const handleGetUser = async () => {
-    return await service.me()
-  }
 
   useEffect(() => {
     window.innerWidth > 600 && exit();

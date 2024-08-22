@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyledTweetContainer } from './TweetContainer';
 import AuthorData from './user-post-data/AuthorData';
-import type { Post, User } from '../../service';
+import type { Post } from '../../service';
 import { StyledReactionsContainer } from './ReactionsContainer';
 import Reaction from './reaction/Reaction';
 import { useHttpRequestService } from '../../service/HttpRequestService';
@@ -12,6 +12,7 @@ import DeletePostModal from './delete-post-modal/DeletePostModal';
 import ImageContainer from './tweet-image/ImageContainer';
 import CommentModal from '../comment/comment-modal/CommentModal';
 import { useNavigate } from 'react-router-dom';
+import { useGetUser } from '../../redux/hooks';
 
 interface TweetProps {
   post: Post;
@@ -23,24 +24,12 @@ const Tweet = ({ post }: TweetProps) => {
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
   const service = useHttpRequestService();
   const navigate = useNavigate();
-  const [user, setUser] = useState<User>();
-
-  useEffect(() => {
-    handleGetUser().then((r) => setUser(r));
-  }, []);
-
-  const handleGetUser = async () => {
-    return await service.me();
-  };
-
-  const getCountByType = (type: string): number => {
-    return actualPost?.reactions?.filter((r) => r.type === type).length ?? 0;
-  };
+  const user = useGetUser();
 
   const handleReaction = async (type: string) => {
     const reacted = actualPost.reactions.find((r) => r.type === type && r.userId === user?.id);
     if (reacted) {
-      await service.deleteReaction(reacted.id);
+      await service.deleteReaction(actualPost.id, type);
     } else {
       await service.createReaction(actualPost.id, type);
     }
@@ -49,11 +38,9 @@ const Tweet = ({ post }: TweetProps) => {
   };
 
   const hasReactedByType = (type: string): boolean => {
-    // TODO: Adapt this to my backend endpoint
-    return false;
-    return actualPost.reactions.some((r) => r.type === type && r.userId === user?.id);
+    return actualPost.reactions?.some((r) => r.type === type && r.userId === user?.id);
   };
-  console.log(post);
+
   return (
     <>
       {post && (

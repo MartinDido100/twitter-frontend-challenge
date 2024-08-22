@@ -23,7 +23,6 @@ const SignInPage = () => {
       .signIn({ username: email, password })
       .then((res) => navigate('/'))
       .catch((e) => {
-        console.log(e);
         setError(true);
       });
   };

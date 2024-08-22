@@ -22,7 +22,7 @@ const ProtectedNav = () => {
       await service.isLogged();
       setIsLogged(true);
     } catch (_) {
-      navigate('/sign-up');
+      navigate('/sign-in');
     }
   };
 

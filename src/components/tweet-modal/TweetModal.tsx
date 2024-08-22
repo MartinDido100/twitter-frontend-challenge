@@ -1,6 +1,6 @@
-import React from "react";
-import TweetBox from "../tweet-box/TweetBox";
-import { PostModal } from "../post-modal/PostModal";
+import React from 'react';
+import TweetBox from '../tweet-box/TweetBox';
+import { PostModal } from '../post-modal/PostModal';
 
 interface TweetModalProps {
   open: boolean;
@@ -11,7 +11,7 @@ export const TweetModal = ({ open, onClose }: TweetModalProps) => {
   return (
     <>
       <PostModal show={open} onClose={onClose}>
-        <TweetBox borderless close={onClose} />
+        <TweetBox close={onClose} />
       </PostModal>
     </>
   );

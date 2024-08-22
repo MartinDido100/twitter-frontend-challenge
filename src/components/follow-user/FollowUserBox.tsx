@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../button/Button';
 import { useHttpRequestService } from '../../service/HttpRequestService';
 import UserDataBox from '../user-data-box/UserDataBox';
 import { useTranslation } from 'react-i18next';
 import { ButtonType } from '../button/StyledButton';
 import './FollowUserBox.css';
-import { Author, User } from '../../service';
+import { useGetUser } from '../../redux/hooks';
 
 interface FollowUserBoxProps {
   profilePicture?: string;
@@ -17,20 +17,12 @@ interface FollowUserBoxProps {
 const FollowUserBox = ({ profilePicture, name, username, id }: FollowUserBoxProps) => {
   const { t } = useTranslation();
   const service = useHttpRequestService();
-  const [user, setUser] = useState<User>();
+  const [isFollowing, setIsFollowing] = useState(false);
+  const user = useGetUser()
 
   useEffect(() => {
-    handleGetUser().then((r) => {
-      setUser(r);
-      // setIsFollowing(r?.following.some((f: Author) => f.id === id));
-    });
+    // setIsFollowing(r?.following.some((f: Author) => f.id === user?.id));
   }, []);
-
-  const handleGetUser = async () => {
-    return await service.me();
-  };
-
-  const [isFollowing, setIsFollowing] = useState(false);
 
   const handleFollow = async () => {
     if (isFollowing) {

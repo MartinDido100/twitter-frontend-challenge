@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import SuggestionBox from './components/suggestionBox/SuggestionBox';
 import ContentContainer from './components/contentContainer/ContentContainer';
-import { updateFeed } from '../../redux/user';
+import { updateFeed, setUser } from '../../redux/user';
 import { useHttpRequestService } from '../../service/HttpRequestService';
 import { SearchBar } from '../../components/search-bar/SearchBar';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +16,8 @@ const HomePage = () => {
 
   const handleSetUser = async () => {
     try {
+      const user = await service.me();
+      dispatch(setUser(user));
       const data = await service.getPosts(query);
       dispatch(updateFeed(data));
     } catch (e) {
@@ -24,7 +26,7 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    handleSetUser().then();
+    handleSetUser();
   }, []);
 
   return (

@@ -6,7 +6,7 @@ interface ReactionProps {
   img: IconType;
   count: number;
   reacted: boolean;
-  reactionFunction: () => void;
+  reactionFunction: () => Promise<void> | void;
   increment: number;
 }
 const Reaction = ({
