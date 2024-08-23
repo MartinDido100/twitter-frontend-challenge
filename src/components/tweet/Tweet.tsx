@@ -4,7 +4,12 @@ import AuthorData from './user-post-data/AuthorData';
 import type { Post } from '../../service';
 import { StyledReactionsContainer } from './ReactionsContainer';
 import Reaction from './reaction/Reaction';
-import { useHttpRequestService } from '../../service/HttpRequestService';
+import {
+  useHttpRequestService,
+  useCreateReaction,
+  useDeleteReaction,
+  useGetPostById,
+} from '../../service/HttpRequestService';
 import { IconType } from '../icon/Icon';
 import { StyledContainer } from '../common/Container';
 import ThreeDots from '../common/ThreeDots';
@@ -22,23 +27,41 @@ const Tweet = ({ post }: TweetProps) => {
   const [actualPost, setActualPost] = useState<Post>(post);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
-  const service = useHttpRequestService();
   const navigate = useNavigate();
   const user = useGetUser();
+  const { mutate: createReaction } = useCreateReaction();
+  const { mutate: deleteReaction } = useDeleteReaction();
+  const { fetchPostById } = useGetPostById(actualPost.id);
 
   const handleReaction = async (type: string) => {
     const reacted = actualPost.reactions.find((r) => r.type === type && r.userId === user?.id);
     if (reacted) {
-      await service.deleteReaction(actualPost.id, type);
+      deleteReaction(
+        { postId: actualPost.id, type },
+        {
+          onSuccess: async () => {
+            const { data } = await fetchPostById();
+            setActualPost(data);
+          },
+        }
+      );
     } else {
-      await service.createReaction(actualPost.id, type);
+      createReaction(
+        { postId: actualPost.id, type },
+        {
+          onSuccess: async () => {
+            const { data } = await fetchPostById();
+            setActualPost(data);
+          },
+        }
+      );
     }
-    const newPost = await service.getPostById(post.id);
-    setActualPost(newPost);
   };
 
   const hasReactedByType = (type: string): boolean => {
-    return actualPost.reactions?.some((r) => r.type === type && r.userId === user?.id);
+    return actualPost.reactions.some((r) => {
+      return r.type === type && r.userId === user.id;
+    });
   };
 
   return (

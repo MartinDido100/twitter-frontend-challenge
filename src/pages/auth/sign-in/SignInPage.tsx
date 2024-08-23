@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import logo from '../../../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useHttpRequestService } from '../../../service/HttpRequestService';
+import { useSignIn } from '../../../service/HttpRequestService';
 import AuthWrapper from '../AuthWrapper';
 import LabeledInput from '../../../components/labeled-input/LabeledInput';
 import Button from '../../../components/button/Button';
@@ -13,18 +13,20 @@ const SignInPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
-
-  const httpRequestService = useHttpRequestService();
+  const { mutate } = useSignIn();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   const handleSubmit = () => {
-    httpRequestService
-      .signIn({ username: email, password })
-      .then((res) => navigate('/'))
-      .catch((e) => {
-        setError(true);
-      });
+    mutate(
+      { username: email, password },
+      {
+        onSuccess: () => {
+          navigate('/');
+        },
+        onError: () => setError(true),
+      }
+    );
   };
 
   return (

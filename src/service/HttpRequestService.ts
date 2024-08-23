@@ -1,8 +1,7 @@
 import type { PostData, SingInData, SingUpData } from './index'
 import axios from 'axios'
 import { S3Service } from './S3Service'
-
-const url = process.env.REACT_APP_API_URL || 'http://localhost:8080/api'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 axios.interceptors.request.use(
   (config) => {
@@ -13,6 +12,92 @@ axios.interceptors.request.use(
     return Promise.reject(error)
   }
 )
+
+const url = process.env.REACT_APP_API_URL || 'http://localhost:8080/api'
+
+export const useSignUp = () => {
+  return useMutation({
+    mutationFn: async (formData: Partial<SingUpData>) => await httpRequestService.signUp(formData),
+  });
+};
+
+export const useSignIn = () => {
+    return useMutation({
+      mutationFn: async (formData: SingInData) => await httpRequestService.signIn(formData),
+    })
+};
+
+
+export const useCreatePost = (postData: PostData) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => await httpRequestService.createPost(postData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['post'],
+      });
+    },
+  });
+};
+
+export const useGetPaginatedPosts = (limit: number, after: string, query: string) => {
+  return useQuery({
+    queryKey: ['post'],
+    queryFn: async () => await httpRequestService.getPaginatedPosts(limit,after,query),
+    retry: false
+  })
+}
+
+export const useGetPosts = (query: string) => {
+  const { data, isLoading, error, refetch: fetchPosts } = useQuery({
+    queryKey: ['post'],
+    queryFn: async () => await httpRequestService.getPosts(query),
+    enabled: false
+  });
+  return { data, isLoading, error, fetchPosts };
+};
+
+export const useGetPostById = (id: string) => {
+  const { data, isLoading, error, refetch: fetchPostById } = useQuery({
+    queryKey: ['post'],
+    queryFn: async () => await httpRequestService.getPostById(id),
+    enabled: false
+  });
+  return { data, isLoading, error, fetchPostById };
+}
+
+export const useRecommendedUsers = (limit: number,skip: number) => {
+  const {data,isLoading,error} = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => await httpRequestService.getRecommendedUsers(limit,skip)
+  })
+
+  return {data,isLoading,error}
+}
+
+export const useMe = () => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => await httpRequestService.me()
+  });
+
+  return {data,isLoading,error}
+}
+
+export const useCreateReaction = () => {
+    return useMutation({
+      mutationFn: async ({ postId, type }: { postId: string; type: string }) =>
+        await httpRequestService.createReaction(postId, type)
+    });
+}
+
+export const useDeleteReaction = () => {
+  return useMutation({
+    mutationKey: ['reaction'],
+    mutationFn: async ({postId, type}: {postId: string,type: string}) => 
+      await httpRequestService.deleteReaction(postId, type)
+  });
+};
 
 const httpRequestService = {
   signUp: async (data: Partial<SingUpData>) => {
@@ -30,7 +115,8 @@ const httpRequestService = {
     }
   },
   createPost: async (data: PostData) => {
-    const res = await axios.post(`${url}/post`, data)
+    const images = data.images?.map(image => image.name)
+    const res = await axios.post(`${url}/post`, {content: data.content,images})
     if (res.status === 201) {
       const { upload } = S3Service
       for (const imageUrl of res.data.images) {
@@ -244,9 +330,4 @@ const httpRequestService = {
 
 const useHttpRequestService = () => httpRequestService
 
-// For class component (remove when unused)
-class HttpService {
-  service = httpRequestService
-}
-
-export { useHttpRequestService, HttpService }
+export { useHttpRequestService }

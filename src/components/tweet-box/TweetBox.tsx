@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import { useHttpRequestService } from '../../service/HttpRequestService';
 import { useGetUser } from '../../redux/hooks';
+import { PostData } from '../../service';
 
 interface TweetBoxProps {
   parentId?: string;
@@ -39,6 +40,11 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
     try {
       //TODO: Upload post here
       //TODO: Check how images are uploaded and fix it in httpService
+      const data: PostData = {
+        content,
+        images,
+      };
+      await httpService.createPost(data);
       setContent('');
       setImages([]);
       setImagesPreview([]);

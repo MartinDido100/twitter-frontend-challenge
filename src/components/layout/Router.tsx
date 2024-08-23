@@ -11,15 +11,19 @@ import TweetPage from '../../pages/create-tweet-page/TweetPage';
 import CommentPage from '../../pages/create-comment-page/CommentPage';
 import { useHttpRequestService } from '../../service/HttpRequestService';
 import PostPage from '../../pages/post-page/PostPage';
+import { setUser } from '../../redux/user';
+import { useAppDispatch } from '../../redux/hooks';
 
 const ProtectedNav = () => {
   const service = useHttpRequestService();
   const [isLogged, setIsLogged] = useState<boolean | undefined>(undefined);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const getIsLogged = async () => {
     try {
-      await service.isLogged();
+      const user = await service.me();
+      dispatch(setUser(user));
       setIsLogged(true);
     } catch (_) {
       navigate('/sign-in');

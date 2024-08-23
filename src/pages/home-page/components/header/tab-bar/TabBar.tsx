@@ -23,7 +23,7 @@ const TabBar = () => {
 
   return (
     <>
-      <StyledTabBarContainer>
+      <StyledTabBarContainer> 
         <Tab
           active={activeFirstPage}
           text={t("header.for-you")}
