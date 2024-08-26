@@ -9,30 +9,30 @@ import RecommendationPage from '../../pages/recommendation/RecommendationPage';
 import ProfilePage from '../../pages/profile/ProfilePage';
 import TweetPage from '../../pages/create-tweet-page/TweetPage';
 import CommentPage from '../../pages/create-comment-page/CommentPage';
-import { useHttpRequestService } from '../../service/HttpRequestService';
+import { useMe } from '../../service/HttpRequestService';
 import PostPage from '../../pages/post-page/PostPage';
 import { setUser } from '../../redux/user';
 import { useAppDispatch } from '../../redux/hooks';
 
 const ProtectedNav = () => {
-  const service = useHttpRequestService();
-  const [isLogged, setIsLogged] = useState<boolean | undefined>(undefined);
+  const { fetchMe } = useMe();
+  const dispatch = useAppDispatch()
+  const [isLogged, setIsLogged] = useState<boolean>(false);
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
-  const getIsLogged = async () => {
-    try {
-      const user = await service.me();
-      dispatch(setUser(user));
-      setIsLogged(true);
-    } catch (_) {
+  const checkIsLogged = async () => {
+    const { data: user, error } = await fetchMe();
+    dispatch(setUser(user));
+    if (error) {
       navigate('/sign-in');
+      return;
     }
+    setIsLogged(true);
   };
 
   useEffect(() => {
-    getIsLogged();
-  }, [service]);
+    checkIsLogged();
+  }, []);
 
   return (
     <>

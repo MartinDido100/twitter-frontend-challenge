@@ -38,7 +38,6 @@ const userSlice = createSlice({
     setQuery: (state, action) => {
       state.query = action.payload;
     },
-
     setChat: (state, action) => {
       state.currentChat = action.payload;
     },

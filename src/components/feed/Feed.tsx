@@ -1,8 +1,8 @@
-import React from "react";
-import { Post } from "../../service";
-import { StyledContainer } from "../common/Container";
-import Tweet from "../tweet/Tweet";
-import Loader from "../loader/Loader";
+import React from 'react';
+import { Post } from '../../service';
+import { StyledContainer } from '../common/Container';
+import Tweet from '../tweet/Tweet';
+import Loader from '../loader/Loader';
 
 interface FeedProps {
   posts: Post[];
@@ -11,7 +11,7 @@ interface FeedProps {
 
 const Feed = ({ posts, loading }: FeedProps) => {
   return (
-    <StyledContainer width={"100%"} alignItems={"center"}>
+    <StyledContainer width={'100%'} alignItems={'center'}>
       {posts
         .filter((post, index, self) => {
           return self.findIndex((p) => p.id === post.id) === index;

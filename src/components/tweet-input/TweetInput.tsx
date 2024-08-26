@@ -1,8 +1,8 @@
-import React, { ChangeEventHandler } from "react";
-import Avatar from "../common/avatar/Avatar";
-import Icon from "../../assets/icon.jpg";
-import { StyledTweetInputContainer } from "./TweetInputContainer";
-import { StyledBorderlessTextArea } from "./BorderlessTextArea";
+import React, { ChangeEventHandler } from 'react';
+import Avatar from '../common/avatar/Avatar';
+import Icon from '../../assets/icon.jpg';
+import { StyledTweetInputContainer } from './TweetInputContainer';
+import { StyledBorderlessTextArea } from './BorderlessTextArea';
 
 interface TweetInputProps {
   placeholder: string;
@@ -12,22 +12,16 @@ interface TweetInputProps {
   maxLength: number;
   value?: string;
 }
-const TweetInput = ({
-  placeholder,
-  src,
-  alt,
-  onChange,
-  maxLength,
-  value,
-}: TweetInputProps) => {
+const TweetInput = ({ placeholder, src, alt, onChange, maxLength, value }: TweetInputProps) => {
   return (
     <StyledTweetInputContainer>
-      <Avatar src={src ?? Icon} alt={alt ?? "Icon"} />
+      <Avatar src={src ?? Icon} alt={alt ?? 'Icon'} />
       <StyledBorderlessTextArea
+        id="tweet-box"
         onChange={onChange}
         maxLength={maxLength}
         placeholder={placeholder}
-        value={value ?? ""}
+        value={value ?? ''}
       />
     </StyledTweetInputContainer>
   );

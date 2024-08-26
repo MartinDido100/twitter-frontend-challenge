@@ -52,7 +52,7 @@ const ProfilePage = () => {
   };
 
   useEffect(() => {
-    getProfileData().then();
+    getProfileData();
   }, [id]);
 
   if (!id) return null;
@@ -124,7 +124,7 @@ const ProfilePage = () => {
               </StyledContainer>
             </StyledContainer>
             <StyledContainer width={'100%'}>
-              {profile.followers ? <ProfileFeed /> : <StyledH5>Private account</StyledH5>}
+              {!profile.private || profile.id === user.id ? <ProfileFeed /> : <StyledH5>Private account</StyledH5>}
             </StyledContainer>
             <Modal
               show={showModal}

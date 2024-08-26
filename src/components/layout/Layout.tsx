@@ -25,7 +25,13 @@ i18next.use(initReactI18next).init({
   fallbackLng: 'en',
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 10 * (60 * 1000),
+    },
+  },
+});
 
 export const Layout = () => {
   return (

@@ -38,8 +38,6 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
   };
   const handleSubmit = async () => {
     try {
-      //TODO: Upload post here
-      //TODO: Check how images are uploaded and fix it in httpService
       const data: PostData = {
         content,
         images,
@@ -58,7 +56,7 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
   };
 
   const handleRemoveImage = (index: number) => {
-    const newImages = images.filter((i, idx) => idx !== index);
+    const newImages = images.filter((_, idx) => idx !== index);
     const newImagesPreview = newImages.map((i) => URL.createObjectURL(i));
     setImages(newImages);
     setImagesPreview(newImagesPreview);

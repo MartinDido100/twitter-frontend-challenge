@@ -40,12 +40,27 @@ export const useCreatePost = (postData: PostData) => {
   });
 };
 
+export const useDeletePost = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({id}:{id:string}) => await httpRequestService.deletePost(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['post'],
+      });
+    },
+  });
+}
+
 export const useGetPaginatedPosts = (limit: number, after: string, query: string) => {
-  return useQuery({
+  const { refetch: fetchPaginatedPosts } = useQuery({
     queryKey: ['post'],
-    queryFn: async () => await httpRequestService.getPaginatedPosts(limit,after,query),
-    retry: false
-  })
+    queryFn: async () => await httpRequestService.getPaginatedPosts(limit, after, query),
+    retry: false,
+    enabled: false
+  });
+
+  return {fetchPaginatedPosts}
 }
 
 export const useGetPosts = (query: string) => {
@@ -76,16 +91,20 @@ export const useRecommendedUsers = (limit: number,skip: number) => {
 }
 
 export const useMe = () => {
-  const { data, isLoading, error } = useQuery({
+  const { refetch: fetchMe } = useQuery({
     queryKey: ['user'],
-    queryFn: async () => await httpRequestService.me()
+    queryFn: async () => await httpRequestService.me(),
+    enabled: false,
+    retry: false,
+    refetchOnWindowFocus: false
   });
 
-  return {data,isLoading,error}
+  return {fetchMe}
 }
 
 export const useCreateReaction = () => {
     return useMutation({
+      mutationKey: ['reaction'],
       mutationFn: async ({ postId, type }: { postId: string; type: string }) =>
         await httpRequestService.createReaction(postId, type)
     });
@@ -98,6 +117,90 @@ export const useDeleteReaction = () => {
       await httpRequestService.deleteReaction(postId, type)
   });
 };
+
+export const useFollowUser = () => {
+  return useMutation({
+    mutationKey: ['follow'],
+    mutationFn: async ({userId}:{userId: string}) => await httpRequestService.followUser(userId)
+  })
+}
+
+export const useUnfollowUser = () => {
+  return useMutation({
+    mutationKey: ['follow'],
+    mutationFn: async ({ userId }: { userId: string }) => await httpRequestService.unfollowUser(userId),
+  });
+};
+
+export const useSearchUsers = (username: string, limit: number, skip: number) => {
+  const { refetch: search } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => await httpRequestService.searchUsers(username,limit,skip),
+    enabled: false,
+  });
+
+  return { search };
+};
+
+export const useGetProfile = (id: string) => {
+  const {data,error} = useQuery({
+    queryKey: ['user','profile'],
+    queryFn: async () => await httpRequestService.getProfile(id)
+  })
+
+  return {data,error}
+}
+
+export const useGetPaginatedPostsFromProfile = (limit: number,after: string,id: string) => {
+  const {refetch: fetchProfilePosts} = useQuery({
+    queryKey: ['post','profile'],
+    queryFn: async () => await httpRequestService.getPaginatedPostsFromProfile(limit,after,id)
+  })
+
+  return {fetchProfilePosts}
+}
+
+export const useGetPostsFromProfile = (id: string) => {
+  const { refetch: fetchProfilePosts } = useQuery({
+    queryKey: ['post', 'profile'],
+    queryFn: async () => await httpRequestService.getPostsFromProfile(id),
+  });
+
+  return {fetchProfilePosts}
+}
+
+export const useIsLogged = () => {
+  const {refetch: getIsLogged} = useQuery({
+    queryKey: ['auth'],
+    queryFn: async () => await httpRequestService.isLogged(),
+    enabled:false,
+    retry:false
+  })
+
+  return {getIsLogged}
+}
+
+export const useGetProfileView = (id: string) => {
+  const {data,error} = useQuery({
+    queryKey: ['profile','user'],
+    queryFn: async () => await httpRequestService.getProfileView(id),
+    refetchOnWindowFocus: false
+  })
+
+  return {data,error}
+}
+
+export const useDeleteProfile = () =>{
+  const {refetch: deleteProfile} = useQuery({
+    queryKey: ['delete','user'],
+    queryFn: async () => await httpRequestService.deleteProfile(),
+    enabled: false
+  })
+
+  return {deleteProfile}
+}
+
+
 
 const httpRequestService = {
   signUp: async (data: Partial<SingUpData>) => {
@@ -196,9 +299,8 @@ const httpRequestService = {
     try {
       const cancelToken = axios.CancelToken.source()
 
-      const response = await axios.get(`${url}/user/search`, {
+      const response = await axios.get(`${url}/user/by_username/${username}`, {
         params: {
-          username,
           limit,
           skip
         },
@@ -214,7 +316,7 @@ const httpRequestService = {
   },
 
   getProfile: async (id: string) => {
-    const res = await axios.get(`${url}/user/profile/${id}`)
+    const res = await axios.get(`${url}/user/${id}`)
     if (res.status === 200) {
       return res.data
     }
@@ -257,7 +359,7 @@ const httpRequestService = {
   },
 
   deleteProfile: async () => {
-    const res = await axios.delete(`${url}/user/me`)
+    const res = await axios.delete(`${url}/user`)
 
     if (res.status === 204) {
       localStorage.removeItem('token')
@@ -328,6 +430,6 @@ const httpRequestService = {
   }
 }
 
-const useHttpRequestService = () => httpRequestService
+const useHttpRequestService = () => httpRequestService;
 
-export { useHttpRequestService }
+export { useHttpRequestService };

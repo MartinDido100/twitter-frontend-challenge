@@ -4,12 +4,7 @@ import AuthorData from './user-post-data/AuthorData';
 import type { Post } from '../../service';
 import { StyledReactionsContainer } from './ReactionsContainer';
 import Reaction from './reaction/Reaction';
-import {
-  useHttpRequestService,
-  useCreateReaction,
-  useDeleteReaction,
-  useGetPostById,
-} from '../../service/HttpRequestService';
+import { useCreateReaction, useDeleteReaction, useGetPostById } from '../../service/HttpRequestService';
 import { IconType } from '../icon/Icon';
 import { StyledContainer } from '../common/Container';
 import ThreeDots from '../common/ThreeDots';
@@ -29,33 +24,23 @@ const Tweet = ({ post }: TweetProps) => {
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
   const navigate = useNavigate();
   const user = useGetUser();
-  const { mutate: createReaction } = useCreateReaction();
-  const { mutate: deleteReaction } = useDeleteReaction();
+  const { mutateAsync: createReaction } = useCreateReaction();
+  const { mutateAsync: deleteReaction } = useDeleteReaction();
   const { fetchPostById } = useGetPostById(actualPost.id);
 
   const handleReaction = async (type: string) => {
     const reacted = actualPost.reactions.find((r) => r.type === type && r.userId === user?.id);
     if (reacted) {
-      deleteReaction(
-        { postId: actualPost.id, type },
-        {
-          onSuccess: async () => {
-            const { data } = await fetchPostById();
-            setActualPost(data);
-          },
-        }
-      );
+      await deleteReaction({ postId: actualPost.id, type });
     } else {
-      createReaction(
-        { postId: actualPost.id, type },
-        {
-          onSuccess: async () => {
-            const { data } = await fetchPostById();
-            setActualPost(data);
-          },
-        }
-      );
+      await createReaction({ postId: actualPost.id, type });
     }
+    handlePostUpdate();
+  };
+
+  const handlePostUpdate = async () => {
+    const { data } = await fetchPostById();
+    setActualPost(data);
   };
 
   const hasReactedByType = (type: string): boolean => {
