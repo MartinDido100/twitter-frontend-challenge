@@ -8,18 +8,32 @@ import LabeledInput from '../../../components/labeled-input/LabeledInput';
 import Button from '../../../components/button/Button';
 import { ButtonType } from '../../../components/button/StyledButton';
 import { StyledH3 } from '../../../components/common/text';
+import { useFormik } from 'formik';
+
+interface SignInData {
+  username: string;
+  password: string;
+}
+
+interface SignInErrors {
+  username?: string;
+  password?: string;
+}
 
 const SignInPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formErrors, setFormErrors] = useState<SignInErrors | null>(null);
   const [error, setError] = useState(false);
   const { mutate } = useSignIn();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const handleSubmit = () => {
+  const handleSubmit = (values: SignInData) => {
+    if (formErrors) {
+      return;
+    }
+
     mutate(
-      { username: email, password },
+      { username: values.username, password: values.password },
       {
         onSuccess: () => {
           navigate('/');
@@ -28,6 +42,31 @@ const SignInPage = () => {
       }
     );
   };
+
+  const validateFields = (values: SignInData) => {
+    setFormErrors(null);
+    if (!values.username) {
+      setFormErrors((prev) => {
+        return { ...prev, username: t('error.formError.requiredUsername') };
+      });
+    }
+
+    if (!values.password) {
+      setFormErrors((prev) => {
+        return { ...prev, password: t('error.formError.requiredPassword') };
+      });
+    }
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      username: '',
+      password: '',
+    },
+    onSubmit: handleSubmit,
+    validate: validateFields,
+    validateOnChange: false,
+  });
 
   return (
     <AuthWrapper>
@@ -42,21 +81,31 @@ const SignInPage = () => {
               required
               placeholder={'Enter user...'}
               title={t('input-params.username')}
-              error={error}
-              onChange={(e) => setEmail(e.target.value)}
+              error={formErrors?.username}
+              onChange={formik.handleChange}
+              value={formik.values.username}
+              id="username"
             />
             <LabeledInput
               type="password"
               required
               placeholder={'Enter password...'}
               title={t('input-params.password')}
-              error={error}
-              onChange={(e) => setPassword(e.target.value)}
+              error={formErrors?.password}
+              onChange={formik.handleChange}
+              value={formik.values.password}
+              id="password"
             />
             <p className={'error-message'}>{error && t('error.login')}</p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <Button text={t('buttons.login')} buttonType={ButtonType.FOLLOW} size={'MEDIUM'} onClick={handleSubmit} />
+            <Button
+              text={t('buttons.login')}
+              buttonType={ButtonType.FOLLOW}
+              size={'MEDIUM'}
+              submit
+              onClick={() => formik.handleSubmit()}
+            />
             <Button
               text={t('buttons.register')}
               buttonType={ButtonType.OUTLINED}

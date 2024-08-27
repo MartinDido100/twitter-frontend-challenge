@@ -1,6 +1,6 @@
 // SwitchButton.tsx
-import React from "react";
-import styled from "styled-components";
+import React from 'react';
+import styled from 'styled-components';
 
 const StyledSwitchContainer = styled.div`
   position: relative;
@@ -21,16 +21,16 @@ const StyledLabel = styled.label<{ checked: boolean }>`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: ${({ checked }) => (checked ? "#2196F3" : "#ccc")};
+  background-color: ${({ checked }) => (checked ? '#2196F3' : '#ccc')};
   border-radius: 15px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 
   &:before {
-    content: "";
+    content: '';
     position: absolute;
     top: 3px;
-    left: ${({ checked }) => (checked ? "30px" : "3px")};
+    left: ${({ checked }) => (checked ? '30px' : '3px')};
     width: 24px;
     height: 24px;
     background-color: white;
@@ -47,7 +47,7 @@ interface SwitchButtonProps {
 const SwitchButton = ({ checked, onChange }: SwitchButtonProps) => {
   return (
     <StyledSwitchContainer onClick={onChange}>
-      <StyledInput type="checkbox" checked={checked} />
+      <StyledInput type="checkbox" checked={checked} readOnly/>
       <StyledLabel checked={checked} />
     </StyledSwitchContainer>
   );

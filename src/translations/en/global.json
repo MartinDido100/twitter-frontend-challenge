@@ -33,7 +33,17 @@
     "comment" : "Tweet your reply"
   },
   "error": {
-    "login": "Sorry, your username or password was incorrect. Please try again."
+    "login": "Sorry, your username or password was incorrect. Please try again.",
+    "register": "Sorry, username or email already exists",
+    "formError": {
+      "requiredName" : "Name required",
+      "requiredEmail" : "Email required",
+      "invalidEmail" : "Ivalid Email",
+      "requiredUsername" : "Username required",
+      "requiredPassword" : "Password required",
+      "confirmRequired" : "Cofirm password required",
+      "differentPass" : "Both passwords must be equal"
+    }
   },
   "input-params": {
     "username": "Username",

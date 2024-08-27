@@ -35,7 +35,17 @@
     "comment": "Escribe tu respuesta"
   },
   "error": {
-    "login": "Lo siento, tu nombre de usuario o contraseña es incorrecto. Por favor, inténtalo de nuevo."
+    "login": "Lo siento, tu nombre de usuario o contraseña es incorrecto. Por favor, inténtalo de nuevo.",
+    "register": "Lo siento, el nombre de usuario o el email ya fueron tomados",
+    "formError": {
+      "requiredName": "Nombre obligatorio",
+      "requiredEmail": "Email obligatorio",
+      "invalidEmail": "Email invalido",
+      "requiredUsername": "Nombre de usuario obligatorio",
+      "requiredPassword": "Contraseña obligatorio",
+      "confirmRequired": "Confirmar contraseña obligatoria",
+      "differentPass": "Las contraseñas deben coincidir"
+    }
   },
   "input-params": {
     "username": "Nombre de usuario",

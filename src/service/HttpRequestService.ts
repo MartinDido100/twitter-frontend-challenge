@@ -143,12 +143,13 @@ export const useSearchUsers = (username: string, limit: number, skip: number) =>
 };
 
 export const useGetProfile = (id: string) => {
-  const {data,error} = useQuery({
+  const {refetch: getProfile} = useQuery({
     queryKey: ['user','profile'],
-    queryFn: async () => await httpRequestService.getProfile(id)
+    queryFn: async () => await httpRequestService.getProfile(id),
+    enabled: false
   })
 
-  return {data,error}
+  return {getProfile}
 }
 
 export const useGetPaginatedPostsFromProfile = (limit: number,after: string,id: string) => {
@@ -181,23 +182,27 @@ export const useIsLogged = () => {
 }
 
 export const useGetProfileView = (id: string) => {
-  const {data,error} = useQuery({
+  const {refetch: getProfileView} = useQuery({
     queryKey: ['profile','user'],
     queryFn: async () => await httpRequestService.getProfileView(id),
-    refetchOnWindowFocus: false
-  })
-
-  return {data,error}
-}
-
-export const useDeleteProfile = () =>{
-  const {refetch: deleteProfile} = useQuery({
-    queryKey: ['delete','user'],
-    queryFn: async () => await httpRequestService.deleteProfile(),
+    refetchOnWindowFocus: false,
     enabled: false
   })
 
-  return {deleteProfile}
+  return {getProfileView}
+}
+
+export const useDeleteProfile = () =>{
+  const client = useQueryClient()
+  return useMutation({
+    mutationKey: ['profile'],
+    mutationFn: async () => await httpRequestService.deleteProfile(),
+    onSuccess: () => {
+      client.invalidateQueries({
+        queryKey: ['user', 'profile'],
+      });
+    }
+  })
 }
 
 
@@ -283,14 +288,14 @@ const httpRequestService = {
   },
   followUser: async (userId: string) => {
     const res = await axios.post(
-      `${url}/follow/${userId}`
+      `${url}/follower/follow/${userId}`
     )
     if (res.status === 201) {
       return res.data
     }
   },
   unfollowUser: async (userId: string) => {
-    const res = await axios.delete(`${url}/follow/${userId}`)
+    const res = await axios.post(`${url}/follower/unfollow/${userId}`)
     if (res.status === 200) {
       return res.data
     }

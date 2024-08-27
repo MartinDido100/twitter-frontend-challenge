@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProfileInfo from './ProfileInfo';
 import { useNavigate, useParams } from 'react-router-dom';
 import Modal from '../../components/modal/Modal';
 import { useTranslation } from 'react-i18next';
 import { User } from '../../service';
 import { ButtonType } from '../../components/button/StyledButton';
-import { useHttpRequestService } from '../../service/HttpRequestService';
+import {
+  useDeleteProfile,
+  useFollowUser,
+  useGetProfile,
+  useGetProfileView,
+  useUnfollowUser,
+} from '../../service/HttpRequestService';
 import Button from '../../components/button/Button';
 import ProfileFeed from '../../components/feed/ProfileFeed';
 import { StyledContainer } from '../../components/common/Container';
@@ -22,10 +28,15 @@ const ProfilePage = () => {
     type: ButtonType.DEFAULT,
     buttonText: '',
   });
-  const service = useHttpRequestService();
+  // const service = useHttpRequestService();
   const user = useGetUser();
-
+  const { mutateAsync: followUser } = useFollowUser();
+  const { mutateAsync: unfollowUser } = useUnfollowUser();
+  const { mutateAsync: deleteProfile } = useDeleteProfile();
   const id = useParams().id;
+  const { getProfile } = useGetProfile(id!);
+  const { getProfileView } = useGetProfileView(id!);
+
   const navigate = useNavigate();
 
   const { t } = useTranslation();
@@ -36,18 +47,22 @@ const ProfilePage = () => {
     else return { component: ButtonType.FOLLOW, text: t('buttons.follow') };
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (profile?.id === user?.id) {
-      service.deleteProfile().then(() => {
-        localStorage.removeItem('token');
-        navigate('/sign-in');
-      });
+      await deleteProfile();
+      localStorage.removeItem('token');
+      navigate('sign-in');
     } else {
-      service.unfollowUser(profile!.id).then(async () => {
-        setFollowing(false);
-        setShowModal(false);
-        await getProfileData();
-      });
+      await unfollowUser(
+        { userId: profile!.id },
+        {
+          onSuccess: () => {
+            setFollowing(false);
+            setShowModal(false);
+          },
+        }
+      );
+      await getProfileData();
     }
   };
 
@@ -76,31 +91,34 @@ const ProfilePage = () => {
           buttonText: t('buttons.unfollow'),
         });
       } else {
-        await service.followUser(id);
-        service.getProfile(id).then((res) => setProfile(res));
+        await followUser(
+          { userId: profile!.id },
+          {
+            onError: (e) => {
+              console.log(e);
+            },
+          }
+        );
+
+        const { data } = await getProfile();
+        setProfile(data);
       }
       return await getProfileData();
     }
   };
 
   const getProfileData = async () => {
-    service
-      .getProfile(id)
-      .then((res) => {
-        setProfile(res);
-        setFollowing(res ? res?.followers.some((follower: User) => follower.id === user?.id) : false);
-      })
-      .catch(() => {
-        service
-          .getProfileView(id)
-          .then((res) => {
-            setProfile(res);
-            setFollowing(false);
-          })
-          .catch((error2) => {
-            console.log(error2);
-          });
-      });
+    const { data, error } = await getProfile();
+
+    if (error) {
+      const { data } = await getProfileView();
+      setProfile(data);
+      setFollowing(false);
+      return;
+    }
+
+    setProfile(data);
+    setFollowing(data.following);
   };
 
   return (

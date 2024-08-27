@@ -5,6 +5,7 @@ import { useSearchUsers } from '../../service/HttpRequestService';
 import { useTranslation } from 'react-i18next';
 import { StyledSearchBarContainer } from './SearchBarContainer';
 import { StyledSearchBarInput } from './SearchBarInput';
+import { useOutsideClick } from '../../hooks/useClickOutside';
 
 export const SearchBar = () => {
   const [results, setResults] = useState<Author[]>([]);
@@ -15,6 +16,14 @@ export const SearchBar = () => {
   const { search } = useSearchUsers(query, limit, skip);
   let debounceTimer: NodeJS.Timeout;
   const { t } = useTranslation();
+
+  const closeModal = () => {
+    setQuery('')
+    setSearched(false)
+    setResults([])
+  }
+
+  const ref = useOutsideClick(closeModal)
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputQuery = e.target.value;
@@ -43,7 +52,7 @@ export const SearchBar = () => {
   }, [query]);
 
   return (
-    <StyledSearchBarContainer>
+    <StyledSearchBarContainer ref={ref}>
       <StyledSearchBarInput
         id="searchbar"
         onChange={handleChange}

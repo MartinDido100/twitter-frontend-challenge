@@ -1,10 +1,11 @@
 import LogoutPrompt from '../navbar/logout-prompt/LogoutPrompt';
 import { StyledLogoutPrompt, StyledProfileLogoutPromptContainer } from './StyledProfileLogoutPromptContainer';
-import React, { useState } from 'react';
+import React, { RefObject, useState } from 'react';
 import icon from '../../assets/icon.jpg';
 import { StyledP } from '../common/text';
 import { StyledContainer } from '../common/Container';
 import { useGetUser } from '../../redux/hooks';
+import { useOutsideClick } from '../../hooks/useClickOutside';
 
 interface ProfileLogoutPromptProps {
   margin: string;
@@ -14,6 +15,12 @@ interface ProfileLogoutPromptProps {
 const ProfileLogoutPrompt = ({ margin, direction }: ProfileLogoutPromptProps) => {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const user = useGetUser();
+
+  const closeLogout = () => {
+    setLogoutOpen(false);
+  };
+
+  const ref = useOutsideClick(closeLogout);
 
   const handleLogout = () => {
     setLogoutOpen(!logoutOpen);
@@ -31,6 +38,7 @@ const ProfileLogoutPrompt = ({ margin, direction }: ProfileLogoutPromptProps) =>
       alignItems={'center'}
       gap={'8px'}
       onClick={handleLogout}
+      ref={ref}
       cursor={'pointer'}
     >
       <StyledProfileLogoutPromptContainer direction={direction}>

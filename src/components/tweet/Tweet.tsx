@@ -13,6 +13,7 @@ import ImageContainer from './tweet-image/ImageContainer';
 import CommentModal from '../comment/comment-modal/CommentModal';
 import { useNavigate } from 'react-router-dom';
 import { useGetUser } from '../../redux/hooks';
+import { useOutsideClick } from '../../hooks/useClickOutside';
 
 interface TweetProps {
   post: Post;
@@ -27,6 +28,12 @@ const Tweet = ({ post }: TweetProps) => {
   const { mutateAsync: createReaction } = useCreateReaction();
   const { mutateAsync: deleteReaction } = useDeleteReaction();
   const { fetchPostById } = useGetPostById(actualPost.id);
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false)
+  }
+
+  const ref = useOutsideClick(closeDeleteModal)
 
   const handleReaction = async (type: string) => {
     const reacted = actualPost.reactions.find((r) => r.type === type && r.userId === user?.id);
@@ -59,6 +66,7 @@ const Tweet = ({ post }: TweetProps) => {
             alignItems={'center'}
             justifyContent={'center'}
             maxHeight={'48px'}
+            ref={ref}
           >
             <AuthorData
               id={post.author.id}
