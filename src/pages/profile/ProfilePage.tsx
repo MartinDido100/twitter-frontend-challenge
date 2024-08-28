@@ -5,13 +5,7 @@ import Modal from '../../components/modal/Modal';
 import { useTranslation } from 'react-i18next';
 import { User } from '../../service';
 import { ButtonType } from '../../components/button/StyledButton';
-import {
-  useDeleteProfile,
-  useFollowUser,
-  useGetProfile,
-  useGetProfileView,
-  useUnfollowUser,
-} from '../../service/HttpRequestService';
+import { useDeleteProfile, useFollowUser, useGetProfile, useUnfollowUser } from '../../service/HttpRequestService';
 import Button from '../../components/button/Button';
 import ProfileFeed from '../../components/feed/ProfileFeed';
 import { StyledContainer } from '../../components/common/Container';
@@ -20,22 +14,21 @@ import { useGetUser } from '../../redux/hooks';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState<User | null>(null);
-  const [following, setFollowing] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [following, setFollowing] = useState<boolean>(false);
   const [modalValues, setModalValues] = useState({
     text: '',
     title: '',
     type: ButtonType.DEFAULT,
     buttonText: '',
   });
-  // const service = useHttpRequestService();
+
   const user = useGetUser();
   const { mutateAsync: followUser } = useFollowUser();
   const { mutateAsync: unfollowUser } = useUnfollowUser();
   const { mutateAsync: deleteProfile } = useDeleteProfile();
   const id = useParams().id;
-  const { getProfile } = useGetProfile(id!);
-  const { getProfileView } = useGetProfileView(id!);
+  const { data } = useGetProfile(id!);
 
   const navigate = useNavigate();
 
@@ -46,7 +39,6 @@ const ProfilePage = () => {
     if (following) return { component: ButtonType.OUTLINED, text: t('buttons.unfollow') };
     else return { component: ButtonType.FOLLOW, text: t('buttons.follow') };
   };
-
   const handleSubmit = async () => {
     if (profile?.id === user?.id) {
       await deleteProfile();
@@ -62,13 +54,12 @@ const ProfilePage = () => {
           },
         }
       );
-      await getProfileData();
     }
   };
 
   useEffect(() => {
     getProfileData();
-  }, [id]);
+  }, [id, data]);
 
   if (!id) return null;
 
@@ -97,26 +88,17 @@ const ProfilePage = () => {
             onError: (e) => {
               console.log(e);
             },
+            onSuccess: async () => {
+              setFollowing(true);
+            },
           }
         );
-
-        const { data } = await getProfile();
-        setProfile(data);
       }
-      return await getProfileData();
     }
   };
 
   const getProfileData = async () => {
-    const { data, error } = await getProfile();
-
-    if (error) {
-      const { data } = await getProfileView();
-      setProfile(data);
-      setFollowing(false);
-      return;
-    }
-
+    if (data === undefined) return;
     setProfile(data);
     setFollowing(data.following);
   };

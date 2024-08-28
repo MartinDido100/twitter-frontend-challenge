@@ -1,6 +1,6 @@
-import React from "react";
-import Feed from "./Feed";
-import { useGetComments } from "../../hooks/useGetComments";
+import React from 'react';
+import Feed from './Feed';
+import { useGetComments } from '../../hooks/useGetComments';
 
 interface CommentFeedProps {
   postId: string;

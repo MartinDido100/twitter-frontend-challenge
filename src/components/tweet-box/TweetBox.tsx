@@ -1,7 +1,6 @@
-import React, { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import Button from '../button/Button';
 import TweetInput from '../tweet-input/TweetInput';
-import { setLength, updateFeed } from '../../redux/user';
 import ImageContainer from '../tweet/tweet-image/ImageContainer';
 import { BackArrowIcon } from '../icon/Icon';
 import ImageInput from '../common/ImageInput';
@@ -10,11 +9,10 @@ import { ButtonType } from '../button/StyledButton';
 import { StyledTweetBoxContainer } from './TweetBoxContainer';
 import { StyledContainer } from '../common/Container';
 import { StyledButtonContainer } from './ButtonContainer';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../redux/store';
-import { useHttpRequestService } from '../../service/HttpRequestService';
+import { useCreatePost } from '../../service/HttpRequestService';
 import { useGetUser } from '../../redux/hooks';
 import { PostData } from '../../service';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TweetBoxProps {
   parentId?: string;
@@ -26,33 +24,33 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
   const [content, setContent] = useState<string>('');
   const [images, setImages] = useState<File[]>([]);
   const [imagesPreview, setImagesPreview] = useState<string[]>([]);
-
-  const { length, query } = useSelector((state: RootState) => state.user);
-  const httpService = useHttpRequestService();
-  const dispatch = useDispatch();
+  const { mutateAsync: createPost } = useCreatePost();
   const { t } = useTranslation();
   const user = useGetUser();
+  const queryClient = useQueryClient();
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
   };
   const handleSubmit = async () => {
-    try {
-      const data: PostData = {
-        content,
-        images,
-      };
-      await httpService.createPost(data);
-      setContent('');
-      setImages([]);
-      setImagesPreview([]);
-      dispatch(setLength(length + 1));
-      const posts = await httpService.getPosts(query);
-      dispatch(updateFeed(posts));
-      close && close();
-    } catch (e) {
-      console.log(e);
-    }
+    const data: PostData = {
+      content,
+      images,
+    };
+    await createPost(data, {
+      onError: (e) => {
+        console.log(e);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ['feed'],
+        });
+      },
+    });
+    setContent('');
+    setImages([]);
+    setImagesPreview([]);
+    close && close();
   };
 
   const handleRemoveImage = (index: number) => {

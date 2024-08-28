@@ -28,15 +28,9 @@ export const useSignIn = () => {
 };
 
 
-export const useCreatePost = (postData: PostData) => {
-  const queryClient = useQueryClient();
+export const useCreatePost = () => {
   return useMutation({
-    mutationFn: async () => await httpRequestService.createPost(postData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['post'],
-      });
-    },
+    mutationFn: async (postData: PostData) => await httpRequestService.createPost(postData),
   });
 };
 
@@ -53,32 +47,29 @@ export const useDeletePost = () => {
 }
 
 export const useGetPaginatedPosts = (limit: number, after: string, query: string) => {
-  const { refetch: fetchPaginatedPosts } = useQuery({
-    queryKey: ['post'],
+  const { data,isError,isLoading } = useQuery({
+    queryKey: ['feed'],
     queryFn: async () => await httpRequestService.getPaginatedPosts(limit, after, query),
-    retry: false,
-    enabled: false
+    refetchOnWindowFocus: false,
+    retry: false
   });
-
-  return {fetchPaginatedPosts}
+  return {data,isError,isLoading}
 }
 
 export const useGetPosts = (query: string) => {
-  const { data, isLoading, error, refetch: fetchPosts } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['post'],
     queryFn: async () => await httpRequestService.getPosts(query),
-    enabled: false
   });
-  return { data, isLoading, error, fetchPosts };
+  return { data, isLoading, isError };
 };
 
 export const useGetPostById = (id: string) => {
-  const { data, isLoading, error, refetch: fetchPostById } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['post'],
     queryFn: async () => await httpRequestService.getPostById(id),
-    enabled: false
   });
-  return { data, isLoading, error, fetchPostById };
+  return { data, isLoading, error };
 }
 
 export const useRecommendedUsers = (limit: number,skip: number) => {
@@ -143,54 +134,41 @@ export const useSearchUsers = (username: string, limit: number, skip: number) =>
 };
 
 export const useGetProfile = (id: string) => {
-  const {refetch: getProfile} = useQuery({
-    queryKey: ['user','profile'],
+  const { data } = useQuery({
+    queryKey: ['user', 'profile',id],
     queryFn: async () => await httpRequestService.getProfile(id),
-    enabled: false
-  })
+  });
 
-  return {getProfile}
+  return { data };
 }
 
 export const useGetPaginatedPostsFromProfile = (limit: number,after: string,id: string) => {
-  const {refetch: fetchProfilePosts} = useQuery({
-    queryKey: ['post','profile'],
-    queryFn: async () => await httpRequestService.getPaginatedPostsFromProfile(limit,after,id)
-  })
+  const { data, isLoading, isError, isRefetching } = useQuery({
+    queryKey: ['feed', 'profile', id],
+    queryFn: async () => await httpRequestService.getPaginatedPostsFromProfile(limit,after,id),
+  });
 
-  return {fetchProfilePosts}
+  return { data, isLoading, isError, isRefetching };
 }
 
 export const useGetPostsFromProfile = (id: string) => {
-  const { refetch: fetchProfilePosts } = useQuery({
-    queryKey: ['post', 'profile'],
-    queryFn: async () => await httpRequestService.getPostsFromProfile(id),
+  const { data, isLoading, isError, isRefetching } = useQuery({
+    queryKey: ['feed', 'profile', id],
+    queryFn: async () => await httpRequestService.getPostsFromProfile(id)
   });
 
-  return {fetchProfilePosts}
+  return { data, isLoading, isError,isRefetching };
 }
 
-export const useIsLogged = () => {
-  const {refetch: getIsLogged} = useQuery({
-    queryKey: ['auth'],
-    queryFn: async () => await httpRequestService.isLogged(),
-    enabled:false,
-    retry:false
-  })
-
-  return {getIsLogged}
-}
-
-export const useGetProfileView = (id: string) => {
-  const {refetch: getProfileView} = useQuery({
-    queryKey: ['profile','user'],
-    queryFn: async () => await httpRequestService.getProfileView(id),
-    refetchOnWindowFocus: false,
-    enabled: false
-  })
-
-  return {getProfileView}
-}
+// export const useIsLogged = () => {
+//   const {refetch: getIsLogged} = useQuery({
+//     queryKey: ['auth'],
+//     queryFn: async () => await httpRequestService.isLogged(),
+//     enabled:false,
+//     retry:false
+//   })
+//   return {getIsLogged}
+// }
 
 export const useDeleteProfile = () =>{
   const client = useQueryClient()
@@ -199,13 +177,11 @@ export const useDeleteProfile = () =>{
     mutationFn: async () => await httpRequestService.deleteProfile(),
     onSuccess: () => {
       client.invalidateQueries({
-        queryKey: ['user', 'profile'],
+        queryKey: ['user', 'profile','feed'],
       });
     }
   })
 }
-
-
 
 const httpRequestService = {
   signUp: async (data: Partial<SingUpData>) => {
@@ -238,9 +214,9 @@ const httpRequestService = {
     const res = await axios.get(`${url}/post/${query}`, {
       params: {
         limit,
-        after
-      }
-    })
+        after,
+      },
+    });
     if (res.status === 200) {
       return res.data
     }
@@ -353,14 +329,6 @@ const httpRequestService = {
   isLogged: async () => {
     const res = await axios.get(`${url}/user/me`)
     return res.status === 200
-  },
-
-  getProfileView: async (id: string) => {
-    const res = await axios.get(`${url}/user/${id}`)
-
-    if (res.status === 200) {
-      return res.data
-    }
   },
 
   deleteProfile: async () => {

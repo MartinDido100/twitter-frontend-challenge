@@ -14,44 +14,54 @@ import CommentModal from '../comment/comment-modal/CommentModal';
 import { useNavigate } from 'react-router-dom';
 import { useGetUser } from '../../redux/hooks';
 import { useOutsideClick } from '../../hooks/useClickOutside';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TweetProps {
   post: Post;
 }
 
 const Tweet = ({ post }: TweetProps) => {
-  const [actualPost, setActualPost] = useState<Post>(post);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showCommentModal, setShowCommentModal] = useState<boolean>(false);
   const navigate = useNavigate();
   const user = useGetUser();
+  const queryClient = useQueryClient();
   const { mutateAsync: createReaction } = useCreateReaction();
   const { mutateAsync: deleteReaction } = useDeleteReaction();
-  const { fetchPostById } = useGetPostById(actualPost.id);
 
   const closeDeleteModal = () => {
-    setShowDeleteModal(false)
-  }
+    setShowDeleteModal(false);
+  };
 
-  const ref = useOutsideClick(closeDeleteModal)
+  const ref = useOutsideClick(closeDeleteModal);
 
   const handleReaction = async (type: string) => {
-    const reacted = actualPost.reactions.find((r) => r.type === type && r.userId === user?.id);
+    const reacted = post.reactions.find((r) => r.type === type && r.userId === user?.id);
     if (reacted) {
-      await deleteReaction({ postId: actualPost.id, type });
+      await deleteReaction(
+        { postId: post.id, type },
+        {
+          onSuccess: handlePostUpdate,
+        }
+      );
     } else {
-      await createReaction({ postId: actualPost.id, type });
+      await createReaction(
+        { postId: post.id, type },
+        {
+          onSuccess: handlePostUpdate,
+        }
+      );
     }
-    handlePostUpdate();
   };
 
   const handlePostUpdate = async () => {
-    const { data } = await fetchPostById();
-    setActualPost(data);
+    queryClient.invalidateQueries({
+      queryKey: ['feed'],
+    });
   };
 
   const hasReactedByType = (type: string): boolean => {
-    return actualPost.reactions.some((r) => {
+    return post.reactions.some((r) => {
       return r.type === type && r.userId === user.id;
     });
   };
@@ -103,7 +113,7 @@ const Tweet = ({ post }: TweetProps) => {
           <StyledReactionsContainer>
             <Reaction
               img={IconType.CHAT}
-              count={actualPost?.qtyComments}
+              count={post?.qtyComments}
               reactionFunction={() =>
                 window.innerWidth > 600 ? setShowCommentModal(true) : navigate(`/compose/comment/${post.id}`)
               }
@@ -112,14 +122,14 @@ const Tweet = ({ post }: TweetProps) => {
             />
             <Reaction
               img={IconType.RETWEET}
-              count={actualPost?.qtyRetweets}
+              count={post?.qtyRetweets}
               reactionFunction={() => handleReaction('RETWEET')}
               increment={1}
               reacted={hasReactedByType('RETWEET')}
             />
             <Reaction
               img={IconType.LIKE}
-              count={actualPost?.qtyLikes}
+              count={post?.qtyLikes}
               reactionFunction={() => handleReaction('LIKE')}
               increment={1}
               reacted={hasReactedByType('LIKE')}

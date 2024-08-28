@@ -4,10 +4,15 @@ import { useGetProfilePosts } from '../../hooks/useGetProfilePosts';
 import { StyledH5 } from '../common/text';
 
 const ProfileFeed = () => {
-  const { posts, loading } = useGetProfilePosts();
-
+  const { posts, loading, isRefetching } = useGetProfilePosts();
   return (
-    <>{posts.length > 0 ? <Feed posts={posts} loading={loading} /> : <StyledH5>This user has no tweets</StyledH5>}</>
+    <>
+      {posts.length > 0 ? (
+        <Feed posts={posts} loading={loading} />
+      ) : (
+        !loading && !isRefetching && <StyledH5>This user has no tweets</StyledH5>
+      )}
+    </>
   );
 };
 export default ProfileFeed;
