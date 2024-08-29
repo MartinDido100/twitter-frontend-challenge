@@ -1,4 +1,3 @@
-import React from "react";
 import TabBar from "./tab-bar/TabBar";
 import logo from "../../../../assets/logo.png";
 import {StyledHeaderContainer} from "./HeaderContainer";

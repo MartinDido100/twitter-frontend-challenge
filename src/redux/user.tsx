@@ -19,7 +19,6 @@ const initialState: InitalStateType = {
     username: '',
     private: false,
     createdAt: new Date().toString(),
-    followers: [],
     following: [],
     posts: [],
   },

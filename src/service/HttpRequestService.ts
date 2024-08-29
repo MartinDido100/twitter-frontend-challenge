@@ -1,4 +1,4 @@
-import type { PostData, SingInData, SingUpData } from './index'
+import type { PostData, SingInData, SingUpData, User } from './index'
 import axios from 'axios'
 import { S3Service } from './S3Service'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -31,6 +31,12 @@ export const useSignIn = () => {
 export const useCreatePost = () => {
   return useMutation({
     mutationFn: async (postData: PostData) => await httpRequestService.createPost(postData),
+  });
+};
+
+export const useCommentPost = () => {
+  return useMutation({
+    mutationFn: async (commentData: PostData) => await httpRequestService.commentPost(commentData),
   });
 };
 
@@ -72,13 +78,16 @@ export const useGetPostById = (id: string) => {
   return { data, isLoading, error };
 }
 
-export const useRecommendedUsers = (limit: number,skip: number) => {
-  const {data,isLoading,error} = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => await httpRequestService.getRecommendedUsers(limit,skip)
+export const useGetRecommendedUsers = (limit: number,skip: number): {
+  data: User[] | undefined
+} => {
+  const {data} = useQuery({
+    queryKey: ['user','recommendations'],
+    queryFn: async () => await httpRequestService.getRecommendedUsers(limit,skip),
+    refetchOnWindowFocus: false
   })
 
-  return {data,isLoading,error}
+  return {data}
 }
 
 export const useMe = () => {
@@ -201,6 +210,18 @@ const httpRequestService = {
   createPost: async (data: PostData) => {
     const images = data.images?.map(image => image.name)
     const res = await axios.post(`${url}/post`, {content: data.content,images})
+    if (res.status === 201) {
+      const { upload } = S3Service
+      for (const imageUrl of res.data.images) {
+        const index: number = res.data.images.indexOf(imageUrl)
+        await upload(data.images![index], imageUrl)
+      }
+      return res.data
+    }
+  },
+  commentPost: async(data: PostData) => {
+    const images = data.images?.map((image) => image.name);
+    const res = await axios.post(`${url}/comment/${data.parentId}`,{content: data.content,images})
     if (res.status === 201) {
       const { upload } = S3Service
       for (const imageUrl of res.data.images) {

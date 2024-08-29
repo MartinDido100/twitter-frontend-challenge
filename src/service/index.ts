@@ -57,8 +57,7 @@ export interface User {
   profilePicture?: string;
   private: boolean;
   createdAt: string;
-  followers: Author[];
-  following: Author[];
+  following: string[];
   posts: Post[];
 }
 

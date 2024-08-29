@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const StyledTabContainer = styled.div`
   display: flex;
@@ -10,6 +10,8 @@ export const StyledTabContainer = styled.div`
   height: 57px;
   flex: 1 0 0;
   transition: 0.3s;
+  cursor: pointer;
+  user-select: none;
 
   p {
     padding-top: 16px;
@@ -26,6 +28,10 @@ export const StyledTabContainer = styled.div`
 
   .active {
     font-weight: 800;
+  }
+
+  &:hover {
+    background: #959a9e90;
   }
 
   @media (max-width: 1024px) {

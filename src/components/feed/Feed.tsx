@@ -1,4 +1,3 @@
-import React from 'react';
 import { Post } from '../../service';
 import { StyledContainer } from '../common/Container';
 import Tweet from '../tweet/Tweet';

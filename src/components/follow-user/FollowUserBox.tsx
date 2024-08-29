@@ -4,8 +4,8 @@ import { useFollowUser, useUnfollowUser } from '../../service/HttpRequestService
 import UserDataBox from '../user-data-box/UserDataBox';
 import { useTranslation } from 'react-i18next';
 import { ButtonType } from '../button/StyledButton';
-import './FollowUserBox.css';
 import { useGetUser } from '../../redux/hooks';
+import { FollowBoxContainer } from './FollowBoxContainer';
 
 interface FollowUserBoxProps {
   profilePicture?: string;
@@ -19,23 +19,42 @@ const FollowUserBox = ({ profilePicture, name, username, id }: FollowUserBoxProp
   const { mutateAsync: followUser } = useFollowUser();
   const { mutateAsync: unfollowUser } = useUnfollowUser();
   const [isFollowing, setIsFollowing] = useState(false);
-  const user = useGetUser(); 
+  const user = useGetUser();
 
   useEffect(() => {
-    // setIsFollowing(r?.following.some((f: Author) => f.id === user?.id));
+    setIsFollowing(user?.following.some((followingId: string) => followingId === id));
   }, []);
 
   const handleFollow = async () => {
     if (isFollowing) {
-      await unfollowUser({ userId: id });
+      await unfollowUser(
+        { userId: id },
+        {
+          onError: (e) => {
+            console.log(e);
+          },
+          onSuccess: async () => {
+            setIsFollowing(false);
+          },
+        }
+      );
     } else {
-      await followUser({ userId: id });
+      await followUser(
+        { userId: id },
+        {
+          onError: (e) => {
+            console.log(e);
+          },
+          onSuccess: async () => {
+            setIsFollowing(true);
+          },
+        }
+      );
     }
-    setIsFollowing(!isFollowing);
   };
 
   return (
-    <div className="box-container">
+    <FollowBoxContainer>
       <UserDataBox id={id} name={name!} profilePicture={profilePicture!} username={username!} />
       <Button
         text={isFollowing ? t('buttons.unfollow') : t('buttons.follow')}
@@ -43,7 +62,7 @@ const FollowUserBox = ({ profilePicture, name, username, id }: FollowUserBoxProp
         size={'SMALL'}
         onClick={handleFollow}
       />
-    </div>
+    </FollowBoxContainer>
   );
 };
 

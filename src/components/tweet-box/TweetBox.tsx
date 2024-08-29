@@ -9,7 +9,7 @@ import { ButtonType } from '../button/StyledButton';
 import { StyledTweetBoxContainer } from './TweetBoxContainer';
 import { StyledContainer } from '../common/Container';
 import { StyledButtonContainer } from './ButtonContainer';
-import { useCreatePost } from '../../service/HttpRequestService';
+import { useCommentPost, useCreatePost } from '../../service/HttpRequestService';
 import { useGetUser } from '../../redux/hooks';
 import { PostData } from '../../service';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,6 +25,7 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
   const [images, setImages] = useState<File[]>([]);
   const [imagesPreview, setImagesPreview] = useState<string[]>([]);
   const { mutateAsync: createPost } = useCreatePost();
+  const { mutateAsync: commentPost } = useCommentPost();
   const { t } = useTranslation();
   const user = useGetUser();
   const queryClient = useQueryClient();
@@ -33,20 +34,35 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
     setContent(e.target.value);
   };
   const handleSubmit = async () => {
-    const data: PostData = {
+    let data: PostData = {
       content,
       images,
     };
-    await createPost(data, {
-      onError: (e) => {
-        console.log(e);
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ['feed'],
-        });
-      },
-    });
+    if (parentId === undefined) {
+      await createPost(data, {
+        onError: (e) => {
+          console.log(e);
+        },
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: ['feed'],
+          });
+        },
+      });
+    } else {
+      data = { ...data, parentId };
+      await commentPost(data, {
+        onError: (e) => {
+          console.log(e);
+        },
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: ['feed'],
+          });
+        },
+      });
+    }
+
     setContent('');
     setImages([]);
     setImagesPreview([]);
