@@ -37,8 +37,8 @@ const ProfileLogoutPrompt = ({ margin, direction }: ProfileLogoutPromptProps) =>
       className={'profile-info'}
       alignItems={'center'}
       gap={'8px'}
-      onClick={handleLogout}
       ref={ref}
+      onClick={handleLogout}
       cursor={'pointer'}
     >
       <StyledProfileLogoutPromptContainer direction={direction}>

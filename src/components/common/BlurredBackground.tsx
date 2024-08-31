@@ -1,5 +1,5 @@
-import styled from "styled-components";
-import { StyledContainer } from "./Container";
+import styled from 'styled-components';
+import { StyledContainer } from './Container';
 
 export const StyledBlurredBackground = styled(StyledContainer)`
   position: fixed;
@@ -9,7 +9,6 @@ export const StyledBlurredBackground = styled(StyledContainer)`
   left: 0;
   background: #00000070;
   margin: 0;
-  z-index: 5;
   box-sizing: border-box;
   padding: 16px;
 `;

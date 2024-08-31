@@ -10,6 +10,7 @@ import { StyledPromptContainer } from './PromptContainer';
 import { StyledContainer } from '../../common/Container';
 import { StyledP } from '../../common/text';
 import { useGetUser } from '../../../redux/hooks';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface LogoutPromptProps {
   show: boolean;
@@ -21,6 +22,7 @@ const LogoutPrompt = ({ show }: LogoutPromptProps) => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const user = useGetUser();
+  const queryClient = useQueryClient();
   const handleClick = () => {
     setShowModal(true);
   };
@@ -35,6 +37,7 @@ const LogoutPrompt = ({ show }: LogoutPromptProps) => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    queryClient.clear();
     navigate('/sign-in');
   };
 

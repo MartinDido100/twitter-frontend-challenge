@@ -15,14 +15,13 @@ import { setUser } from '../../redux/user';
 import { useAppDispatch } from '../../redux/hooks';
 
 const ProtectedNav = () => {
-  const { fetchMe } = useMe();
-  const dispatch = useAppDispatch()
+  const { data, error } = useMe();
+  const dispatch = useAppDispatch();
   const [isLogged, setIsLogged] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const checkIsLogged = async () => {
-    const { data: user, error } = await fetchMe();
-    dispatch(setUser(user));
+    dispatch(setUser(data));
     if (error) {
       navigate('/sign-in');
       return;
@@ -31,8 +30,9 @@ const ProtectedNav = () => {
   };
 
   useEffect(() => {
+    if (data === undefined) return;
     checkIsLogged();
-  }, []);
+  }, [data]);
 
   return (
     <>

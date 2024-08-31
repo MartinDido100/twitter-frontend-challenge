@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const StyledSearchResultModalContainer = styled.div`
   display: flex;
@@ -13,7 +13,8 @@ export const StyledSearchResultModalContainer = styled.div`
   background: ${(props) => props.theme.background};
   box-shadow: 0 0 24px 0 rgba(0, 0, 0, 0.25);
   position: absolute;
-  top: 2px;
+  top: 4.5rem;
+  z-index: 999;
   transition: 0.3s ease-in-out;
   background: ${(props) => props.theme.background};
 `;

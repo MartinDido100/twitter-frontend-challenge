@@ -6,7 +6,6 @@ import { StyledSuggestionBoxContainer } from './SuggestionBoxContainer';
 const SuggestionBox = () => {
   const { data: users } = useGetRecommendedUsers(6, 0);
   const { t } = useTranslation();
-
   return (
     <StyledSuggestionBoxContainer>
       <h6>{t('suggestion.who-to-follow')}</h6>
@@ -14,7 +13,7 @@ const SuggestionBox = () => {
         users
           .filter((value, index, array) => {
             return array.indexOf(value) === index;
-          })
+          }) 
           .slice(0, 5)
           .map((user) => (
             <FollowUserBox

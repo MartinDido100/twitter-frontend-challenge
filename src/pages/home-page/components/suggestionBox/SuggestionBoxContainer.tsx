@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const StyledSuggestionBoxContainer = styled.div`
   display: flex;
@@ -8,8 +8,8 @@ export const StyledSuggestionBoxContainer = styled.div`
   box-sizing: border-box;
   padding: 16px;
   flex-direction: column;
-  position:sticky;
-  top:0;
+  position: sticky;
+  top: 0;
   align-items: flex-start;
   gap: 16px;
   background: ${(props) => props.theme.colors.inactiveBackground};
@@ -18,7 +18,7 @@ export const StyledSuggestionBoxContainer = styled.div`
   h6 {
     color: ${(props) => props.theme.colors.black};
     font-size: 18px;
-    font-family: "Inter";
+    font-family: 'Inter';
     font-weight: 500;
     line-height: 110%;
     letter-spacing: 0.027px;

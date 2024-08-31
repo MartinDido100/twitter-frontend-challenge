@@ -3,7 +3,6 @@ import { Author } from "../../../service";
 import UserDataBox from "../../user-data-box/UserDataBox";
 import { StyledContainer } from "../../common/Container";
 import { StyledSearchResultModalContainer } from "./SearchResultModalContainer";
-import { useOutsideClick } from "../../../hooks/useClickOutside";
 
 interface SearchResultModalProps {
   show: boolean;

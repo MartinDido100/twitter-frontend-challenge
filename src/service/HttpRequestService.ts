@@ -41,34 +41,20 @@ export const useCommentPost = () => {
 };
 
 export const useDeletePost = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({id}:{id:string}) => await httpRequestService.deletePost(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ['post'],
-      });
-    },
   });
 }
 
 export const useGetPaginatedPosts = (limit: number, after: string, query: string) => {
   const { data,isError,isLoading } = useQuery({
-    queryKey: ['feed'],
+    queryKey: ['feed',query],
     queryFn: async () => await httpRequestService.getPaginatedPosts(limit, after, query),
     refetchOnWindowFocus: false,
     retry: false
   });
   return {data,isError,isLoading}
 }
-
-export const useGetPosts = (query: string) => {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['post'],
-    queryFn: async () => await httpRequestService.getPosts(query),
-  });
-  return { data, isLoading, isError };
-};
 
 export const useGetPostById = (id: string) => {
   const { data, isLoading, error } = useQuery({
@@ -82,24 +68,21 @@ export const useGetRecommendedUsers = (limit: number,skip: number): {
   data: User[] | undefined
 } => {
   const {data} = useQuery({
-    queryKey: ['user','recommendations'],
+    queryKey: ['suggestion'],
     queryFn: async () => await httpRequestService.getRecommendedUsers(limit,skip),
     refetchOnWindowFocus: false
   })
-
   return {data}
 }
 
 export const useMe = () => {
-  const { refetch: fetchMe } = useQuery({
+  const { data,error } = useQuery({
     queryKey: ['user'],
     queryFn: async () => await httpRequestService.me(),
-    enabled: false,
     retry: false,
     refetchOnWindowFocus: false
   });
-
-  return {fetchMe}
+  return {data,error}
 }
 
 export const useCreateReaction = () => {
@@ -134,7 +117,7 @@ export const useUnfollowUser = () => {
 
 export const useSearchUsers = (username: string, limit: number, skip: number) => {
   const { refetch: search } = useQuery({
-    queryKey: ['users'],
+    queryKey: ['search'],
     queryFn: async () => await httpRequestService.searchUsers(username,limit,skip),
     enabled: false,
   });
@@ -144,7 +127,7 @@ export const useSearchUsers = (username: string, limit: number, skip: number) =>
 
 export const useGetProfile = (id: string) => {
   const { data } = useQuery({
-    queryKey: ['user', 'profile',id],
+    queryKey: ['user',id],
     queryFn: async () => await httpRequestService.getProfile(id),
   });
 
@@ -153,7 +136,7 @@ export const useGetProfile = (id: string) => {
 
 export const useGetPaginatedPostsFromProfile = (limit: number,after: string,id: string) => {
   const { data, isLoading, isError, isRefetching } = useQuery({
-    queryKey: ['feed', 'profile', id],
+    queryKey: ['user', id],
     queryFn: async () => await httpRequestService.getPaginatedPostsFromProfile(limit,after,id),
   });
 
@@ -162,22 +145,12 @@ export const useGetPaginatedPostsFromProfile = (limit: number,after: string,id: 
 
 export const useGetPostsFromProfile = (id: string) => {
   const { data, isLoading, isError, isRefetching } = useQuery({
-    queryKey: ['feed', 'profile', id],
+    queryKey: ['feed', id],
     queryFn: async () => await httpRequestService.getPostsFromProfile(id)
   });
 
   return { data, isLoading, isError,isRefetching };
 }
-
-// export const useIsLogged = () => {
-//   const {refetch: getIsLogged} = useQuery({
-//     queryKey: ['auth'],
-//     queryFn: async () => await httpRequestService.isLogged(),
-//     enabled:false,
-//     retry:false
-//   })
-//   return {getIsLogged}
-// }
 
 export const useDeleteProfile = () =>{
   const client = useQueryClient()
@@ -186,7 +159,7 @@ export const useDeleteProfile = () =>{
     mutationFn: async () => await httpRequestService.deleteProfile(),
     onSuccess: () => {
       client.invalidateQueries({
-        queryKey: ['user', 'profile','feed'],
+        queryKey: ['user','feed'],
       });
     }
   })
@@ -249,6 +222,7 @@ const httpRequestService = {
     }
   },
   getRecommendedUsers: async (limit: number, skip: number) => {
+    
     const res = await axios.get(`${url}/user`, {
       params: {
         limit,

@@ -11,6 +11,7 @@ import ProfileFeed from '../../components/feed/ProfileFeed';
 import { StyledContainer } from '../../components/common/Container';
 import { StyledH5 } from '../../components/common/text';
 import { useGetUser } from '../../redux/hooks';
+import { useQueryClient } from '@tanstack/react-query';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState<User | null>(null);
@@ -29,7 +30,7 @@ const ProfilePage = () => {
   const { mutateAsync: deleteProfile } = useDeleteProfile();
   const id = useParams().id;
   const { data } = useGetProfile(id!);
-
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const { t } = useTranslation();
@@ -48,9 +49,17 @@ const ProfilePage = () => {
       await unfollowUser(
         { userId: profile!.id },
         {
-          onSuccess: () => {
+          onSuccess: async () => {
             setFollowing(false);
             setShowModal(false);
+            await Promise.all([
+              queryClient.invalidateQueries({
+                queryKey: ['user'],
+              }),
+              queryClient.invalidateQueries({
+                queryKey: ['feed'],
+              }),
+            ]);
           },
         }
       );
@@ -90,6 +99,14 @@ const ProfilePage = () => {
             },
             onSuccess: async () => {
               setFollowing(true);
+              await Promise.all([
+                queryClient.invalidateQueries({
+                  queryKey: ['user'],
+                }),
+                queryClient.invalidateQueries({
+                  queryKey: ['feed'],
+                }),
+              ]);
             },
           }
         );

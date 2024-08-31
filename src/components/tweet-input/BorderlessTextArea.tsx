@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const StyledBorderlessTextArea = styled.textarea`
   display: flex;
@@ -15,7 +15,7 @@ export const StyledBorderlessTextArea = styled.textarea`
   background: none;
   /* H6 */
   font-size: 18px;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 500;
   line-height: 110%;
   letter-spacing: 0.027px;

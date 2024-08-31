@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ButtonType } from '../button/StyledButton';
 import { useGetUser } from '../../redux/hooks';
 import { FollowBoxContainer } from './FollowBoxContainer';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface FollowUserBoxProps {
   profilePicture?: string;
@@ -20,6 +21,7 @@ const FollowUserBox = ({ profilePicture, name, username, id }: FollowUserBoxProp
   const { mutateAsync: unfollowUser } = useUnfollowUser();
   const [isFollowing, setIsFollowing] = useState(false);
   const user = useGetUser();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setIsFollowing(user?.following.some((followingId: string) => followingId === id));
@@ -35,6 +37,14 @@ const FollowUserBox = ({ profilePicture, name, username, id }: FollowUserBoxProp
           },
           onSuccess: async () => {
             setIsFollowing(false);
+            await Promise.all([
+              queryClient.invalidateQueries({
+                queryKey: ['user'],
+              }),
+              queryClient.invalidateQueries({
+                queryKey: ['feed'],
+              }),
+            ]);
           },
         }
       );
@@ -47,6 +57,14 @@ const FollowUserBox = ({ profilePicture, name, username, id }: FollowUserBoxProp
           },
           onSuccess: async () => {
             setIsFollowing(true);
+            await Promise.all([
+              queryClient.invalidateQueries({
+                queryKey: ['user'],
+              }),
+              queryClient.invalidateQueries({
+                queryKey: ['feed'],
+              }),
+            ]);
           },
         }
       );

@@ -12,7 +12,6 @@ export const StyledNavBarContainer = styled.div`
   box-sizing: border-box;
   position: sticky;
   top: 0;
-  z-index: 1;
   .icon {
     display: flex;
     width: 32px;

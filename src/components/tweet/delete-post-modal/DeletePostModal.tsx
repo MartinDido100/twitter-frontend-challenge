@@ -3,12 +3,13 @@ import { DeleteIcon } from '../../icon/Icon';
 import Modal from '../../modal/Modal';
 import Button from '../../button/Button';
 import { updateFeed } from '../../../redux/user';
-import { useDeletePost, useHttpRequestService } from '../../../service/HttpRequestService';
+import { useDeletePost } from '../../../service/HttpRequestService';
 import { useTranslation } from 'react-i18next';
 import { ButtonType } from '../../button/StyledButton';
 import { useAppDispatch, useAppSelector } from '../../../redux/hooks';
 import { Post } from '../../../service';
 import { StyledDeletePostModalContainer } from './DeletePostModalContainer';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface DeletePostModalProps {
   show: boolean;
@@ -21,11 +22,21 @@ export const DeletePostModal = ({ show, id, onClose }: DeletePostModalProps) => 
   const feed = useAppSelector((state) => state.user.feed);
   const dispatch = useAppDispatch();
   const { mutateAsync } = useDeletePost();
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   const handleDelete = async () => {
     try {
-      await mutateAsync({ id });
+      await mutateAsync(
+        { id },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({
+              queryKey: ['feed'],
+            });
+          },
+        }
+      );
       const newFeed = feed.filter((post: Post) => post.id !== id);
       dispatch(updateFeed(newFeed));
       handleClose();
