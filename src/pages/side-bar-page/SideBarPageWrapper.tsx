@@ -11,11 +11,12 @@ export const StyledSideBarPageWrapper = styled.div`
   box-sizing: border-box;
   padding-left: 15%;
   padding-right: 9%;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   @media (max-width: 600px) {
     justify-content: flex-start;
     flex-direction: column;
+    overflow-x: hidden;
 
     padding-left: 0;
     padding-right: 0;

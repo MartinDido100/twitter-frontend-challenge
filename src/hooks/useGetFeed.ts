@@ -8,17 +8,25 @@ export const useGetFeed = () => {
   const dispatch = useAppDispatch();
   const posts = useAppSelector((state) => state.user.feed);
   const query = useAppSelector((state) => state.user.query);
-  const {data,isLoading,isError} = useGetPaginatedPosts(LIMIT,'',query)
+  const after = useAppSelector((state) => state.user.lastPost);
+  const length = useAppSelector((state) => state.user.length);
 
-  const handleFeedUpdate = async () => {
-    dispatch(updateFeed(data));
-    dispatch(setLength(data.length));
+  const {data,isLoading,isError} = useGetPaginatedPosts(LIMIT,after,query)
+  const handleFeedUpdate = () => {
+    if(data.length === length){
+      dispatch(updateFeed(data));
+      dispatch(setLength(data.length));
+    }else{
+      const newFeed = posts.concat(data);
+      dispatch(updateFeed(newFeed));
+      dispatch(setLength(newFeed.length));
+    }
   }
 
   useEffect(() => {
     if(data === undefined) return;
     handleFeedUpdate()
-  }, [query,data]);
+  }, [data]);
 
   return { posts, loading: isLoading ,error: isError };
 };

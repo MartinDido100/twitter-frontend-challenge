@@ -22,17 +22,14 @@ const ProtectedNav = () => {
 
   const checkIsLogged = async () => {
     dispatch(setUser(data));
-    if (error) {
-      navigate('/sign-in');
-      return;
-    }
     setIsLogged(true);
   };
 
   useEffect(() => {
-    if (data === undefined) return;
+    if (error) navigate('sign-in');
+    if(data === undefined) return;
     checkIsLogged();
-  }, [data]);
+  }, [data, error]);
 
   return (
     <>
@@ -79,7 +76,7 @@ export const ROUTER = createBrowserRouter([
         element: <TweetPage />,
       },
       {
-        path: '/post/:id',
+        path: '/compose/comment/:id',
         element: <CommentPage />,
       },
     ],

@@ -1,8 +1,13 @@
-import React from "react";
-import Toast, { ToastType } from "./Toast";
+import React, { createContext } from 'react';
+import { Toast, ToastType, ToastProps } from './Toast';
 
-const FallbackToast = ({ error }: { error: Error }) => {
-  return <Toast type={ToastType.ALERT} message={error.message} />;
+type ToastCtxType = {
+  FallbackToast: ({ error }: { error: Error }) => JSX.Element;
+  Toast: ({ message, type, show }: ToastProps) => JSX.Element;
 };
 
-export default FallbackToast;
+export const ToastContext = createContext<ToastCtxType | null>(null);
+
+export const FallbackToast = ({ error }: { error: Error }) => {
+  return <Toast type={ToastType.ALERT} message={error.message} />;
+};

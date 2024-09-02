@@ -1,11 +1,11 @@
-import React from "react";
-import { StyledAvatarContainer } from "./AvatarContainer";
-import NameImage from "./NameImage";
+import {MouseEvent} from 'react';
+import { StyledAvatarContainer } from './AvatarContainer';
+import NameImage from './NameImage';
 
 interface AvatarProps {
   src: string;
   alt: string;
-  onClick?: () => void;
+  onClick?: (e: MouseEvent<HTMLDivElement>) => void;
   width?: string;
   height?: string;
 }

@@ -7,8 +7,11 @@ export const StyledBlurredBackground = styled(StyledContainer)`
   right: 0;
   bottom: 0;
   left: 0;
+  justify-content: center;
+  align-items: center;
   background: #00000070;
   margin: 0;
   box-sizing: border-box;
   padding: 16px;
+  z-index: 999;
 `;

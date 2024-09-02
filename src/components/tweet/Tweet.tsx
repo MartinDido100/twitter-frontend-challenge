@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, MouseEvent, useContext } from 'react';
 import { StyledTweetContainer } from './TweetContainer';
 import AuthorData from './user-post-data/AuthorData';
 import type { Post } from '../../service';
 import { StyledReactionsContainer } from './ReactionsContainer';
 import Reaction from './reaction/Reaction';
-import { useCreateReaction, useDeleteReaction, useGetPostById } from '../../service/HttpRequestService';
+import { useCreateReaction, useDeleteReaction } from '../../service/HttpRequestService';
 import { IconType } from '../icon/Icon';
 import { StyledContainer } from '../common/Container';
 import ThreeDots from '../common/ThreeDots';
@@ -15,6 +15,9 @@ import { useNavigate } from 'react-router-dom';
 import { useGetUser } from '../../redux/hooks';
 import { useOutsideClick } from '../../hooks/useClickOutside';
 import { useQueryClient } from '@tanstack/react-query';
+import { StyledDots } from '../common/StyledDots';
+import { ToastContext } from '../toast/FallbackToast';
+import { ToastType } from '../toast/Toast';
 
 interface TweetProps {
   post: Post;
@@ -28,6 +31,8 @@ const Tweet = ({ post }: TweetProps) => {
   const queryClient = useQueryClient();
   const { mutateAsync: createReaction } = useCreateReaction();
   const { mutateAsync: deleteReaction } = useDeleteReaction();
+  const [error, setError] = useState<Error | null>(null);
+  const ToastCtx = useContext(ToastContext);
 
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
@@ -42,6 +47,9 @@ const Tweet = ({ post }: TweetProps) => {
         { postId: post.id, type },
         {
           onSuccess: handlePostUpdate,
+          onError: (e: Error) => {
+            setError(e);
+          },
         }
       );
     } else {
@@ -49,15 +57,23 @@ const Tweet = ({ post }: TweetProps) => {
         { postId: post.id, type },
         {
           onSuccess: handlePostUpdate,
+          onError: (e: Error) => {
+            setError(e);
+          },
         }
       );
     }
   };
 
   const handlePostUpdate = async () => {
-    queryClient.invalidateQueries({
-      queryKey: ['feed'],
-    });
+    Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ['feed'],
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['post'],
+      }),
+    ]);
   };
 
   const hasReactedByType = (type: string): boolean => {
@@ -68,8 +84,11 @@ const Tweet = ({ post }: TweetProps) => {
 
   return (
     <>
+      {ToastCtx && (
+        <ToastCtx.Toast message="Error reacting tweet" type={ToastType.ALERT} show={error !== null}></ToastCtx.Toast>
+      )}
       {post && (
-        <StyledTweetContainer>
+        <StyledTweetContainer onClick={() => navigate(`/post/${post.id}`)}>
           <StyledContainer
             style={{ width: '100%' }}
             flexDirection={'row'}
@@ -87,22 +106,26 @@ const Tweet = ({ post }: TweetProps) => {
             />
             {post.authorId === user?.id && (
               <>
-                <DeletePostModal
-                  show={showDeleteModal}
-                  id={post.id}
-                  onClose={() => {
-                    setShowDeleteModal(false);
-                  }}
-                />
-                <ThreeDots
-                  onClick={() => {
-                    setShowDeleteModal(!showDeleteModal);
-                  }}
-                />
+                <div onClick={(e: MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
+                  <DeletePostModal
+                    show={showDeleteModal}
+                    id={post.id}
+                    onClose={() => {
+                      setShowDeleteModal(false);
+                    }}
+                  />
+                </div>
+                <StyledDots onClick={(e: MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
+                  <ThreeDots
+                    onClick={() => {
+                      setShowDeleteModal(!showDeleteModal);
+                    }}
+                  />
+                </StyledDots>
               </>
             )}
           </StyledContainer>
-          <StyledContainer onClick={() => navigate(`/post/${post.id}`)}>
+          <StyledContainer>
             <p>{post.content}</p>
           </StyledContainer>
           {post.images && post.images!.length > 0 && (
@@ -110,7 +133,7 @@ const Tweet = ({ post }: TweetProps) => {
               <ImageContainer images={post.images} />
             </StyledContainer>
           )}
-          <StyledReactionsContainer>
+          <StyledReactionsContainer onClick={(e: MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
             <Reaction
               img={IconType.CHAT}
               count={post?.qtyComments}
@@ -135,7 +158,9 @@ const Tweet = ({ post }: TweetProps) => {
               reacted={hasReactedByType('LIKE')}
             />
           </StyledReactionsContainer>
-          <CommentModal show={showCommentModal} post={post} onClose={() => setShowCommentModal(false)} />
+          <div onClick={(e: MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
+            <CommentModal show={showCommentModal} post={post} onClose={() => setShowCommentModal(false)} />
+          </div>
         </StyledTweetContainer>
       )}
     </>

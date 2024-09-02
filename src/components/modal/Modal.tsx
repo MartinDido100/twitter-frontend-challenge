@@ -17,11 +17,11 @@ interface ModalProps {
 }
 
 const Modal = ({ show, text, acceptButton, onClose, img, title }: ModalProps) => {
-  const closeLogout = () => {
+  const closeModal = () => {
     onClose();
   };
 
-  const ref = useOutsideClick(closeLogout);
+  const ref = useOutsideClick(closeModal);
 
   return (
     <>

@@ -48,7 +48,7 @@ export const useDeletePost = () => {
 
 export const useGetPaginatedPosts = (limit: number, after: string, query: string) => {
   const { data,isError,isLoading } = useQuery({
-    queryKey: ['feed',query],
+    queryKey: ['feed',query,after],
     queryFn: async () => await httpRequestService.getPaginatedPosts(limit, after, query),
     refetchOnWindowFocus: false,
     retry: false
@@ -58,7 +58,7 @@ export const useGetPaginatedPosts = (limit: number, after: string, query: string
 
 export const useGetPostById = (id: string) => {
   const { data, isLoading, error } = useQuery({
-    queryKey: ['post'],
+    queryKey: ['post',id],
     queryFn: async () => await httpRequestService.getPostById(id),
   });
   return { data, isLoading, error };
@@ -165,6 +165,15 @@ export const useDeleteProfile = () =>{
   })
 }
 
+export const useGetCommentsByPost = (postId: string) => {
+  const {data,error,isLoading} = useQuery({
+    queryKey: ['feed',postId],
+    queryFn: async () => await httpRequestService.getCommentsByPostId(postId)
+  })
+
+  return {data,error,isLoading}
+}
+
 const httpRequestService = {
   signUp: async (data: Partial<SingUpData>) => {
     const res = await axios.post(`${url}/auth/signup`, data)
@@ -205,7 +214,7 @@ const httpRequestService = {
     }
   },
   getPaginatedPosts: async (limit: number, after: string, query: string) => {
-    const res = await axios.get(`${url}/post/${query}`, {
+    const res = await axios.get(`${url}/post/feed/${query}`, {
       params: {
         limit,
         after,
@@ -391,7 +400,7 @@ const httpRequestService = {
     }
   },
   getCommentsByPostId: async (id: string) => {
-    const res = await axios.get(`${url}/post/comment/by_post/${id}`)
+    const res = await axios.get(`${url}/comment/${id}`)
     if (res.status === 200) {
       return res.data
     }

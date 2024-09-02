@@ -1,7 +1,8 @@
 import { Post } from '../../service';
-import { StyledContainer } from '../common/Container';
+import { StyledContainer, StyledFeedContainer } from '../common/Container';
 import Tweet from '../tweet/Tweet';
 import Loader from '../loader/Loader';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
 interface FeedProps {
   posts: Post[];
@@ -9,11 +10,18 @@ interface FeedProps {
 }
 
 const Feed = ({ posts, loading }: FeedProps) => {
+  const lastPost = useInfiniteScroll(loading);
+
   return (
-    <StyledContainer width={'100%'} alignItems={'center'}>
-      {posts && posts.map((post: Post) => <Tweet key={post.id} post={post} />)}
+    <StyledFeedContainer width={'100%'} alignItems={'center'} height={'unset'}>
+      {posts &&
+        posts.map((post: Post) => (
+          <StyledContainer ref={lastPost} key={post.id}>
+            <Tweet post={post} />
+          </StyledContainer>
+        ))}
       {loading && <Loader />}
-    </StyledContainer>
+    </StyledFeedContainer>
   );
 };
 

@@ -7,7 +7,8 @@ export const StyledContentContainer = styled.div`
   width: 100%;
   flex: 2;
   height: 100%;
-  border-right: 1px solid ${(props) => props.theme.colors.containerLine};
+  border-right: 1px solid var(--grayscale-container-line, #f0f3f4);
+  border-left: 1px solid var(--grayscale-container-line, #f0f3f4);
 
   .tweet-box-container {
     width: 100%;

@@ -11,6 +11,7 @@ export const StyledUserSuggestionContainer = styled.div`
   align-items: flex-start;
   position: sticky;
   top: 0;
+  border-left: 1px solid ${(props) => props.theme.colors.containerLine};
   justify-content: flex-start;
 
   @media (max-width: 1100px) {

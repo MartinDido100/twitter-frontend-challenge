@@ -24,25 +24,25 @@ export const DeletePostModal = ({ show, id, onClose }: DeletePostModalProps) => 
   const { mutateAsync } = useDeletePost();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const [deleteError, setDeleteError] = useState(false);
 
   const handleDelete = async () => {
-    try {
-      await mutateAsync(
-        { id },
-        {
-          onSuccess: () => {
-            queryClient.invalidateQueries({
-              queryKey: ['feed'],
-            });
-          },
-        }
-      );
-      const newFeed = feed.filter((post: Post) => post.id !== id);
-      dispatch(updateFeed(newFeed));
-      handleClose();
-    } catch (error) {
-      console.log(error);
-    }
+    await mutateAsync(
+      { id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: ['feed'],
+          });
+        },
+        onError: () => {
+          setDeleteError(true);
+        },
+      }
+    );
+    const newFeed = feed.filter((post: Post) => post.id !== id);
+    dispatch(updateFeed(newFeed));
+    handleClose();
   };
 
   const handleClose = () => {

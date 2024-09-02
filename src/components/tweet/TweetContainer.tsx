@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const StyledTweetContainer = styled.div`
   display: flex;
@@ -10,12 +10,13 @@ export const StyledTweetContainer = styled.div`
   gap: 16px;
   margin: 0;
   border-bottom: 1px solid ${(props) => props.theme.colors.containerLine};
+  cursor: pointer;
 
   p {
     color: ${(props) => props.theme.colors.black};
     /* Body-1 */
     font-size: 15px;
-    font-family: "Manrope", sans-serif;
+    font-family: 'Manrope', sans-serif;
     line-height: 110%;
     letter-spacing: -0.15px;
     margin-left: 56px;

@@ -1,9 +1,9 @@
-import React from "react";
-import { StyledAuthorDataContainer } from "./AuthorDataContainer";
-import Avatar from "../../common/avatar/Avatar";
-import Icon from "../../../assets/icon.jpg";
-import { StyledDot } from "../../common/Dot";
-import { useNavigate } from "react-router-dom";
+import React, { MouseEvent } from 'react';
+import { StyledAuthorDataContainer } from './AuthorDataContainer';
+import Avatar from '../../common/avatar/Avatar';
+import Icon from '../../../assets/icon.jpg';
+import { StyledDot } from '../../common/Dot';
+import { useNavigate } from 'react-router-dom';
 
 interface UserPostDataProps {
   createdAt: Date;
@@ -12,33 +12,24 @@ interface UserPostDataProps {
   username: string;
   profilePicture?: string;
 }
-const AuthorData = ({
-  createdAt,
-  id,
-  username,
-  name,
-  profilePicture,
-}: UserPostDataProps) => {
+const AuthorData = ({ createdAt, id, username, name, profilePicture }: UserPostDataProps) => {
   const navigate = useNavigate();
 
-  const redirectToProfile = () => {
+  const redirectToProfile = (e: MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     navigate(`/profile/${id}`);
   };
 
   return (
     <StyledAuthorDataContainer>
-      <Avatar
-        src={profilePicture === null ? Icon : profilePicture!}
-        alt={name}
-        onClick={redirectToProfile}
-      />
+      <Avatar src={profilePicture === null ? Icon : profilePicture!} alt={name} onClick={redirectToProfile} />
       <p>{name}</p>
-      <p className={"username"}>{"@" + username}</p>
+      <p className={'username'}>{'@' + username}</p>
       <StyledDot />
-      <p className={"username"}>
-        {new Date(createdAt).toLocaleString("default", {
-          month: "short",
-          day: "numeric",
+      <p className={'username'}>
+        {new Date(createdAt).toLocaleString('default', {
+          month: 'short',
+          day: 'numeric',
         })}
       </p>
     </StyledAuthorDataContainer>

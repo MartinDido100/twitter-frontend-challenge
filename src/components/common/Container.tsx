@@ -31,22 +31,22 @@ export const StyledContainer = styled(ContainerBase).attrs<ContainerProps>((prop
       `}
   }
 `;
-// TODO add hoverablecontainer
 
-// Example usage:
-// <StyledContainer
-//   hoverable
-//   maxWidth="600px"
-//   justifyContent="center"
-//   // Add more CSS properties as needed
-// >
-//   Content
-// </StyledContainer>
+export const StyledFeedContainer = styled(StyledContainer)`
+  @media (max-width: 600px) {
+    padding-bottom: 3.3rem;
+  }
+`;
 
 export const StyledScrollableContainer = styled(StyledContainer)`
   scrollbar-width: auto;
   overflow-y: auto;
   max-height: 600px;
+
+  @media (max-width: 600px) {
+    overflow-x: hidden;
+    overflow-y: unset;
+  }
 `;
 
 export const StyledOverflowContainer = styled(StyledContainer)`

@@ -1,33 +1,21 @@
-import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { StyledContainer } from '../../components/common/Container';
 import Tweet from '../../components/tweet/Tweet';
 import Loader from '../../components/loader/Loader';
-import { useHttpRequestService } from '../../service/HttpRequestService';
 import TweetBox from '../../components/tweet-box/TweetBox';
 import { StyledH5 } from '../../components/common/text';
 import { StyledFeedContainer } from '../home-page/components/contentContainer/FeedContainer';
 import CommentFeed from '../../components/feed/CommentFeed';
-import { useEffect, useState } from 'react';
-import { Post } from '../../service';
+import { useGetPostById } from '../../service/HttpRequestService';
 
 const PostPage = () => {
-  const service = useHttpRequestService();
   const { id: postId } = useParams();
-  const [post, setPost] = useState<Post | undefined>(undefined);
-
-  const fetchPost = async (): Promise<void> => {
-    service
-      .getPostById(postId!)
-      .then((res) => {
-        setPost(res);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  };
+  const { data: post, error } = useGetPostById(postId!);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPost();
+    if (error) navigate('/');
   }, []);
 
   return (
@@ -43,7 +31,6 @@ const PostPage = () => {
               <StyledContainer borderBottom={'1px solid #ebeef0'} padding={'16px'}>
                 <TweetBox parentId={postId} />
               </StyledContainer>
-
               <StyledContainer minHeight={'53.5vh'}>
                 <CommentFeed postId={postId!} />
               </StyledContainer>

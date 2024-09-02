@@ -1,10 +1,7 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const StyledTweetModalContainer = styled.div`
   position: fixed;
-  transform: translate(50vw, 50vh);
-  top: -40vh;
-  left: -20vw;
   display: flex;
   max-width: 560px;
   width: 100%;

@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useContext, useState } from 'react';
 import Button from '../button/Button';
 import TweetInput from '../tweet-input/TweetInput';
 import ImageContainer from '../tweet/tweet-image/ImageContainer';
@@ -13,6 +13,8 @@ import { useCommentPost, useCreatePost } from '../../service/HttpRequestService'
 import { useGetUser } from '../../redux/hooks';
 import { PostData } from '../../service';
 import { useQueryClient } from '@tanstack/react-query';
+import { ToastContext } from '../toast/FallbackToast';
+import { ToastType } from '../toast/Toast';
 
 interface TweetBoxProps {
   parentId?: string;
@@ -29,6 +31,8 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
   const { t } = useTranslation();
   const user = useGetUser();
   const queryClient = useQueryClient();
+  const [error, setError] = useState<Error | null>(null);
+  const ToastCtx = useContext(ToastContext);
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
@@ -41,7 +45,7 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
     if (parentId === undefined) {
       await createPost(data, {
         onError: (e) => {
-          console.log(e);
+          setError(e);
         },
         onSuccess: () => {
           queryClient.invalidateQueries({
@@ -53,7 +57,7 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
       data = { ...data, parentId };
       await commentPost(data, {
         onError: (e) => {
-          console.log(e);
+          setError(e);
         },
         onSuccess: () => {
           queryClient.invalidateQueries({
@@ -83,44 +87,49 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
   };
 
   return (
-    <StyledTweetBoxContainer>
-      {mobile && (
-        <StyledContainer flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'}>
-          <BackArrowIcon onClick={close} />
-          <Button
-            text={'Tweet'}
-            buttonType={ButtonType.DEFAULT}
-            size={'SMALL'}
-            onClick={handleSubmit}
-            disabled={content.length === 0}
-          />
-        </StyledContainer>
+    <>
+      {ToastCtx && (
+        <ToastCtx.Toast message="Error creating tweet" type={ToastType.ALERT} show={error !== null}></ToastCtx.Toast>
       )}
-      <StyledContainer style={{ width: '100%' }}>
-        <TweetInput
-          onChange={handleChange}
-          maxLength={240}
-          placeholder={t('placeholder.tweet')}
-          value={content}
-          src={user?.profilePicture}
-        />
-        <StyledContainer padding={'0 0 0 10%'}>
-          <ImageContainer editable images={imagesPreview} removeFunction={handleRemoveImage} />
-        </StyledContainer>
-        <StyledButtonContainer>
-          <ImageInput setImages={handleAddImage} parentId={parentId} />
-          {!mobile && (
+      <StyledTweetBoxContainer>
+        {mobile && (
+          <StyledContainer flexDirection={'row'} justifyContent={'space-between'} alignItems={'center'}>
+            <BackArrowIcon onClick={close} />
             <Button
               text={'Tweet'}
               buttonType={ButtonType.DEFAULT}
               size={'SMALL'}
               onClick={handleSubmit}
-              disabled={content.length <= 0 || content.length > 240 || images.length > 4 || images.length < 0}
+              disabled={content.length === 0}
             />
-          )}
-        </StyledButtonContainer>
-      </StyledContainer>
-    </StyledTweetBoxContainer>
+          </StyledContainer>
+        )}
+        <StyledContainer style={{ width: '100%' }}>
+          <TweetInput
+            onChange={handleChange}
+            maxLength={240}
+            placeholder={t('placeholder.tweet')}
+            value={content}
+            src={user?.profilePicture}
+          />
+          <StyledContainer padding={'0 0 0 10%'}>
+            <ImageContainer editable images={imagesPreview} removeFunction={handleRemoveImage} />
+          </StyledContainer>
+          <StyledButtonContainer>
+            <ImageInput setImages={handleAddImage} parentId={parentId} />
+            {!mobile && (
+              <Button
+                text={'Tweet'}
+                buttonType={ButtonType.DEFAULT}
+                size={'SMALL'}
+                onClick={handleSubmit}
+                disabled={content.length <= 0 || content.length > 240 || images.length > 4 || images.length < 0}
+              />
+            )}
+          </StyledButtonContainer>
+        </StyledContainer>
+      </StyledTweetBoxContainer>
+    </>
   );
 };
 
