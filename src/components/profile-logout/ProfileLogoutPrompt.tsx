@@ -1,6 +1,6 @@
 import LogoutPrompt from '../navbar/logout-prompt/LogoutPrompt';
 import { StyledLogoutPrompt, StyledProfileLogoutPromptContainer } from './StyledProfileLogoutPromptContainer';
-import React, { RefObject, useState } from 'react';
+import React, { useState } from 'react';
 import icon from '../../assets/icon.jpg';
 import { StyledP } from '../common/text';
 import { StyledContainer } from '../common/Container';

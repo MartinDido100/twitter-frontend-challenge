@@ -1,7 +1,7 @@
-import type { PostData, SingInData, SingUpData, User } from './index'
+import type { Post, PostData, SingInData, SingUpData, User } from './index'
 import axios from 'axios'
 import { S3Service } from './S3Service'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 axios.interceptors.request.use(
   (config) => {
@@ -53,7 +53,7 @@ export const useGetPaginatedPosts = (limit: number, after: string, query: string
     refetchOnWindowFocus: false,
     retry: false
   });
-  return {data,isError,isLoading}
+  return { data, isError, isLoading };
 }
 
 export const useGetPostById = (id: string) => {
@@ -145,7 +145,7 @@ export const useGetPaginatedPostsFromProfile = (limit: number,after: string,id: 
 
 export const useGetPostsFromProfile = (id: string) => {
   const { data, isLoading, isError, isRefetching } = useQuery({
-    queryKey: ['feed', id],
+    queryKey: ['profileFeed', id],
     queryFn: async () => await httpRequestService.getPostsFromProfile(id)
   });
 

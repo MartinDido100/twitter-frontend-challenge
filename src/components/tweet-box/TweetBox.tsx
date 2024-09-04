@@ -10,11 +10,13 @@ import { StyledTweetBoxContainer } from './TweetBoxContainer';
 import { StyledContainer } from '../common/Container';
 import { StyledButtonContainer } from './ButtonContainer';
 import { useCommentPost, useCreatePost } from '../../service/HttpRequestService';
-import { useGetUser } from '../../redux/hooks';
-import { PostData } from '../../service';
+import { useAppDispatch, useGetUser } from '../../redux/hooks';
+import { Post, PostData } from '../../service';
 import { useQueryClient } from '@tanstack/react-query';
 import { ToastContext } from '../toast/FallbackToast';
 import { ToastType } from '../toast/Toast';
+import { useGetFeed } from '../../hooks/useGetFeed';
+import { concatToFeed, setLastPost } from '../../redux/user';
 
 interface TweetBoxProps {
   parentId?: string;
@@ -33,6 +35,7 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
   const queryClient = useQueryClient();
   const [error, setError] = useState<Error | null>(null);
   const ToastCtx = useContext(ToastContext);
+  const dispatch = useAppDispatch();
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
@@ -47,7 +50,8 @@ const TweetBox = ({ parentId, close, mobile }: TweetBoxProps) => {
         onError: (e) => {
           setError(e);
         },
-        onSuccess: () => {
+        onSuccess: async () => {
+          dispatch(setLastPost(''));
           queryClient.invalidateQueries({
             queryKey: ['feed'],
           });

@@ -13,8 +13,8 @@ export const useGetComments = ({ postId }: UseGetCommentsProps) => {
   const {data,isLoading: loading,error} = useGetCommentsByPost(postId)
 
   const handleFeedUpdate = () => {
-        dispatch(updateFeed(data));
-        dispatch(setLength(data.length));
+      dispatch(updateFeed(data));
+      dispatch(setLength(data.length));
   }
 
   useEffect(() => {
